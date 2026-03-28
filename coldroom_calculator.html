@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coldroom Calculator — PPWC</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080b12;--surface:#0f1320;--surface2:#161c2e;--border:#1e2840;
+  --accent:#00d4ff;--a2:#7b5ea7;--green:#00e5a0;--orange:#ff7c3a;
+  --red:#ff4d4d;--text:#eaecf4;--muted:#4e5f80;--label:#7a8aaa;
+  --ui:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── AMBIENT GLOW ── */
+.glow-1{position:fixed;width:600px;height:600px;top:-200px;left:-150px;background:radial-gradient(circle,rgba(0,212,255,.055) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.glow-2{position:fixed;width:500px;height:500px;bottom:-200px;right:-100px;background:radial-gradient(circle,rgba(123,94,167,.065) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;gap:12px;padding:12px 28px;border-bottom:1px solid var(--border);background:rgba(8,11,18,.85);backdrop-filter:blur(16px);z-index:20;flex-shrink:0;}
+.hico{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--a2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.hdr h1{font-size:14px;font-weight:700;letter-spacing:.05px;}
+.hdr p{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.hright{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.badge{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.18);color:var(--accent);font-size:9px;font-family:var(--mono);padding:2px 7px;border-radius:9px;}
+.hbtn{display:flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface2);color:var(--label);font-family:var(--ui);font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.hbtn:hover{border-color:var(--accent);color:var(--accent);}
+.hbtn.pri{background:linear-gradient(135deg,rgba(0,212,255,.14),rgba(123,94,167,.14));border-color:rgba(0,212,255,.32);color:var(--accent);}
+.hbtn.pri:hover{box-shadow:0 0 14px rgba(0,212,255,.14);}
+.hbtn.glow{background:linear-gradient(135deg,var(--accent),var(--a2));border-color:transparent;color:#fff;box-shadow:0 2px 12px rgba(0,212,255,.25);}
+.hbtn.glow:hover{box-shadow:0 4px 20px rgba(0,212,255,.4);}
+
+/* ── MAIN LAYOUT ── */
+.layout{display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{border-right:1px solid var(--border);overflow-y:auto;background:rgba(15,19,32,.6);}
+.sidebar::-webkit-scrollbar{width:3px;}.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sec{border-bottom:1px solid var(--border);padding:12px 15px;}
+.stitle{font-size:8.5px;font-family:var(--mono);color:var(--accent);letter-spacing:1.6px;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border);}
+.f{margin-bottom:7px;}
+.f label{display:block;font-size:9.5px;color:var(--label);margin-bottom:3px;font-family:var(--mono);}
+.f input,.f select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 9px;outline:none;appearance:none;transition:border-color .15s;}
+.f input:focus,.f select:focus{border-color:var(--accent);}
+.f select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='%234e5f80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:6px;}.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.ti{display:flex;align-items:center;gap:5px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:9.5px;color:var(--label);font-family:var(--mono);user-select:none;transition:all .15s;}
+.ti:hover{border-color:rgba(0,212,255,.4);color:var(--text);}
+.ti.on{border-color:rgba(0,229,160,.32);color:var(--green);background:rgba(0,229,160,.05);}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--border);flex-shrink:0;transition:all .15s;}
+.ti.on .tdot{background:var(--green);box-shadow:0 0 5px var(--green);}
+.mtog{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px;margin-bottom:8px;}
+.mb{flex:1;padding:4px 6px;font-size:9px;font-family:var(--mono);border:none;background:transparent;color:var(--muted);border-radius:3px;cursor:pointer;transition:all .15s;}
+.mb.active{background:var(--surface);color:var(--accent);border:1px solid rgba(0,212,255,.18);}
+
+/* ── MAIN PANEL ── */
+.main{overflow-y:auto;padding:18px 22px;}
+.main::-webkit-scrollbar{width:3px;}.main::-webkit-scrollbar-thumb{background:var(--border);}
+.rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:.4;}
+.kpi.g::before{background:var(--green);}.kpi.o::before{background:var(--orange);}.kpi.p::before{background:var(--a2);}
+.kl{font-size:8.5px;font-family:var(--mono);color:var(--muted);letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px;}
+.kv{font-size:19px;font-weight:700;letter-spacing:-.5px;}.kv span{font-size:10px;font-weight:300;color:var(--muted);margin-left:2px;}
+.ks{font-size:9px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.sbar{display:flex;gap:8px;margin-bottom:13px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 13px;align-items:center;flex-wrap:wrap;}
+.si{display:flex;flex-direction:column;gap:1px;padding-right:12px;border-right:1px solid var(--border);}.si:last-child{border-right:none;}
+.sl{font-size:8px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.sv{font-size:12px;font-weight:700;color:var(--accent);font-family:var(--mono);}
+.bwrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;}
+.bhdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.btitle{font-size:11px;font-weight:600;}.bcnt{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.15);color:var(--accent);font-size:8.5px;font-family:var(--mono);padding:2px 6px;border-radius:7px;}
+.btot{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--green);}
+table{width:100%;border-collapse:collapse;}thead tr{background:var(--surface2);}
+th{text-align:left;font-size:8.5px;font-family:var(--mono);color:var(--muted);letter-spacing:.6px;text-transform:uppercase;padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:6px 10px;font-size:10px;font-family:var(--mono);border-bottom:1px solid rgba(30,40,64,.45);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(0,212,255,.018);}
+.cb{display:inline-block;font-size:8px;padding:2px 5px;border-radius:3px;font-weight:600;letter-spacing:.3px;white-space:nowrap;}
+.cpan{background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.14);}
+.cflo{background:rgba(255,124,58,.08);color:var(--orange);border:1px solid rgba(255,124,58,.14);}
+.cele{background:rgba(255,229,0,.08);color:#ffe500;border:1px solid rgba(255,229,0,.14);}
+.cref{background:rgba(0,229,160,.08);color:var(--green);border:1px solid rgba(0,229,160,.14);}
+.csub{background:rgba(123,94,167,.1);color:#b09fcc;border:1px solid rgba(123,94,167,.18);}
+.cfir{background:rgba(255,77,77,.08);color:var(--red);border:1px solid rgba(255,77,77,.14);}
+.coth{background:rgba(90,100,128,.1);color:var(--label);border:1px solid rgba(90,100,128,.2);}
+.sdiv{background:var(--surface2);padding:5px 10px;font-size:8.5px;font-family:var(--mono);color:var(--accent);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(30,40,64,.45);}
+.grow td{padding:10px;background:var(--surface2);border-top:2px solid var(--border);}
+.tg{font-weight:700;color:var(--green);font-size:12px;}.gy{color:var(--green);}.gn{color:var(--muted);}
+
+/* ══════════════════════════════════════════
+   INTAKE MODAL — DYNAMIC PROMPT FLOW
+══════════════════════════════════════════ */
+.intake-overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(4,6,14,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+.intake-overlay.open{display:flex;}
+.intake-shell{width:min(580px,96vw);position:relative;}
+
+/* ── PROMPT CARD ── */
+.prompt-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:36px 40px 28px;
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(0,212,255,.04);
+  animation:slideUp .32s cubic-bezier(.22,.9,.36,1) both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.prompt-out{animation:slideDown .22s cubic-bezier(.4,0,1,1) both;}
+@keyframes slideDown{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-18px)}}
+
+.prompt-step-ind{display:flex;gap:5px;margin-bottom:28px;}
+.psi{width:22px;height:3px;border-radius:3px;background:var(--border);transition:all .3s;}
+.psi.done{background:var(--accent);}
+.psi.active{background:var(--accent);width:36px;box-shadow:0 0 8px var(--accent);}
+
+.prompt-q{font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.3;margin-bottom:6px;}
+.prompt-hint{font-size:12px;color:var(--muted);margin-bottom:24px;font-family:var(--mono);}
+
+/* Option cards */
+.opt-grid{display:grid;gap:8px;}
+.opt-grid.cols2{grid-template-columns:1fr 1fr;}
+.opt-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.opt{
+  padding:13px 16px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;cursor:pointer;transition:all .15s;user-select:none;
+  display:flex;flex-direction:column;gap:3px;
+}
+.opt:hover{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.04);}
+.opt.selected{border-color:var(--accent);background:rgba(0,212,255,.08);box-shadow:0 0 0 1px rgba(0,212,255,.2);}
+.opt-label{font-size:13px;font-weight:600;}
+.opt-sub{font-size:10px;color:var(--muted);font-family:var(--mono);}
+
+/* Text/number input style in prompt */
+.prompt-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;
+  padding:12px 14px;outline:none;transition:border-color .15s;margin-bottom:4px;
+}
+.prompt-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.08);}
+.prompt-input-row{display:grid;gap:10px;margin-bottom:4px;}
+.prompt-input-row.c2{grid-template-columns:1fr 1fr;}
+.prompt-input-row.c3{grid-template-columns:1fr 1fr 1fr;}
+.inp-wrap label{font-size:9.5px;font-family:var(--mono);color:var(--label);display:block;margin-bottom:4px;}
+
+/* Toggle chips in prompt */
+.ptoggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
+.ptog{
+  display:flex;align-items:center;gap:8px;padding:9px 11px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  cursor:pointer;font-size:11px;font-family:var(--mono);color:var(--label);
+  user-select:none;transition:all .15s;
+}
+.ptog:hover{border-color:rgba(0,229,160,.3);color:var(--text);}
+.ptog.on{border-color:rgba(0,229,160,.35);color:var(--green);background:rgba(0,229,160,.06);}
+.ptog-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:all .15s;}
+.ptog.on .ptog-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+/* Summary row at top of prompt */
+.summary-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;min-height:20px;}
+.spill{display:flex;align-items:center;gap:5px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.16);border-radius:20px;padding:3px 10px;font-size:10px;font-family:var(--mono);color:var(--accent);}
+.spill svg{opacity:.6;}
+
+/* Nav buttons */
+.prompt-nav{display:flex;align-items:center;gap:8px;margin-top:22px;}
+.pnav-back{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:7px;font-family:var(--ui);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.pnav-back:hover{border-color:var(--label);color:var(--text);}
+.pnav-next{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;border:none;padding:10px 26px;border-radius:7px;font-family:var(--ui);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 4px 16px rgba(0,212,255,.22);margin-left:auto;}
+.pnav-next:hover{box-shadow:0 6px 22px rgba(0,212,255,.36);transform:translateY(-1px);}
+.pnav-next:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.pnav-skip{background:transparent;border:none;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;padding:4px 8px;transition:color .15s;}
+.pnav-skip:hover{color:var(--label);}
+
+/* ══════════════════════════════════════════
+   REPORTS & RATE CARD MODALS
+══════════════════════════════════════════ */
+.mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+.mover.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(920px,96vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.7);}
+.modal.narrow{max-width:800px;}
+.mhdr{padding:15px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.mhdr h2{font-size:15px;font-weight:700;}.mhdr p{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.mclose{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.mclose:hover{color:var(--text);border-color:var(--accent);}
+.mbody{overflow-y:auto;padding:18px 22px;flex:1;}.mbody::-webkit-scrollbar{width:4px;}.mbody::-webkit-scrollbar-thumb{background:var(--border);}
+.mfoot{padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.btn{padding:7px 16px;border-radius:6px;font-family:var(--ui);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.btnp{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;}.btnp:hover{opacity:.9;}
+.btns{background:var(--surface2);border:1px solid var(--border);color:var(--label);}.btns:hover{border-color:var(--accent);color:var(--text);}
+.tabs{display:flex;gap:4px;margin-bottom:13px;flex-wrap:wrap;}
+.tab{padding:5px 12px;border-radius:5px;font-size:10px;font-family:var(--mono);border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .15s;}
+.tab.on{background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.28);color:var(--accent);}
+.tc{display:none;}.tc.on{display:block;}
+.rc-table{width:100%;border-collapse:collapse;}
+.rc-table th{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:7px 9px;border-bottom:1px solid var(--border);background:var(--surface2);text-align:left;}
+.rc-table td{padding:4px 5px;border-bottom:1px solid rgba(30,40,64,.4);font-size:10px;font-family:var(--mono);}
+.rc-table tr:hover td{background:rgba(0,212,255,.018);}
+.rc-input{background:var(--surface2);border:1px solid transparent;border-radius:3px;color:var(--text);font-family:var(--mono);font-size:10.5px;padding:3px 6px;width:100%;outline:none;transition:border-color .15s;}
+.rc-input:focus{border-color:var(--accent);}
+.rc-ch td{background:var(--surface2);font-size:8.5px;color:var(--accent);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;padding:6px 9px;border-top:1px solid var(--border);}
+
+/* DOC STYLES */
+.doc{background:#fff;color:#111;border-radius:7px;padding:38px 44px;font-family:Arial,sans-serif;font-size:12px;line-height:1.65;max-width:720px;margin:0 auto;box-shadow:0 4px 28px rgba(0,0,0,.3);}
+.dlh{border-bottom:3px solid #003366;padding-bottom:11px;margin-bottom:16px;}
+.dco{font-size:17px;font-weight:700;color:#003366;}.dtag{font-size:10px;color:#666;margin-top:2px;}
+.dto-b{display:grid;grid-template-columns:1fr 1fr;margin-bottom:12px;}
+.dto,.dref{padding:7px 0;}.dref{text-align:right;}
+.dlbl{font-size:9px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.5px;}.dval{font-size:11px;color:#222;margin-top:2px;}
+.dre{background:#f0f6ff;border-left:3px solid #003366;padding:7px 11px;margin-bottom:14px;font-size:11px;font-weight:600;color:#003366;}
+.dint{font-size:11px;color:#333;margin-bottom:12px;}.dsec{font-size:11px;font-weight:700;color:#003366;margin:14px 0 4px;text-transform:uppercase;}
+.dss{font-size:11px;font-weight:700;color:#222;margin:8px 0 3px;}.dbul{font-size:11px;color:#333;padding-left:14px;margin-bottom:2px;}.dbul::before{content:'— ';color:#666;}
+.dtab{width:100%;border-collapse:collapse;margin:7px 0;font-size:10px;}
+.dtab th{background:#003366;color:#fff;padding:5px 8px;text-align:left;font-size:9px;}.dtab th:last-child,.dtab td:last-child{text-align:right;}
+.dtab td{padding:4px 8px;border-bottom:1px solid #e8e8e8;color:#333;white-space:pre-line;}
+.dtab tr:nth-child(even) td{background:#f9f9f9;}.dtab tr.ch td{background:#e8f0ff;font-weight:700;font-size:9px;color:#003366;text-transform:uppercase;}
+.dtotbox{background:#003366;color:#fff;padding:10px 14px;border-radius:5px;margin:12px 0;display:flex;justify-content:space-between;align-items:center;}
+.dtotlbl{font-size:10px;font-weight:700;}.dtotval{font-size:15px;font-weight:700;}
+.dsum{margin:10px 0;}.dsr{display:flex;justify-content:space-between;padding:4px 9px;font-size:10px;}
+.dsr:nth-child(odd){background:#f9f9f9;}.dsr.tr{background:#003366;color:#fff;font-weight:700;font-size:11px;}.dsr.gr{background:#e8f8f0;color:#006633;}
+.dnl{padding-left:0;list-style:none;}.dnl li{padding:2px 0 2px 12px;font-size:10px;color:#444;position:relative;}.dnl li::before{content:'•';position:absolute;left:0;color:#003366;}
+.dsig{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:36px;}
+.dsigbox{border-top:1px solid #999;padding-top:6px;font-size:9px;color:#666;text-align:center;}.dhr{border:none;border-top:1px solid #ddd;margin:12px 0;}
+.dear-t{width:100%;border-collapse:collapse;font-size:11px;}.dear-t th{background:#003366;color:#fff;padding:5px 8px;text-align:left;font-size:9px;}
+.dear-t td{padding:5px 8px;border-bottom:1px solid #e8e8e8;vertical-align:top;color:#333;}.dear-t tr:nth-child(even) td{background:#f9f9f9;}
+.cpybtn{display:inline-flex;align-items:center;gap:3px;background:#003366;color:#fff;border:none;border-radius:4px;padding:3px 7px;font-size:9px;cursor:pointer;font-family:Arial,sans-serif;}
+.cpybtn:hover{background:#0044aa;}
+</style>
+</head>
+<body>
+<div class="glow-1"></div><div class="glow-2"></div>
+
+<!-- ══ HEADER ══ -->
+<div class="hdr">
+  <div class="hico">❄️</div>
+  <div><h1>Coldroom Cost Calculator</h1><p>PPWC — Auto HP / CU / EV / Materials</p></div>
+  <div class="hright">
+    <div class="badge">v1.5</div>
+    <button class="hbtn" onclick="openRC()">⚙ Rate Card</button>
+    <button class="hbtn pri" onclick="openReports()">📄 Reports</button>
+    <button class="hbtn glow" onclick="openIntake()">＋ New Coldroom</button>
+  </div>
+</div>
+
+<!-- ══ MAIN LAYOUT ══ -->
+<div class="layout">
+  <div class="sidebar">
+    <div class="sec">
+      <div class="stitle">Project Info</div>
+      <div class="f"><label>Client</label><input id="client" type="text" value="LUCK BENG VEGETABLE WHOLESALER" oninput="calc()"></div>
+      <div class="fr"><div class="f"><label>Block</label><input id="block" type="text" value="12" oninput="calc()"></div><div class="f"><label>Unit No.</label><input id="unit" type="text" value="01-595" oninput="calc()"></div></div>
+      <div class="fr"><div class="f"><label>Attn</label><input id="attn" type="text" value="Xia Yu" oninput="calc()"></div><div class="f"><label>Date</label><input id="qdate" type="date" value="2026-03-14" oninput="calc()"></div></div>
+      <div class="fr"><div class="f"><label>QTN (Grant)</label><input id="qtn_grant" type="text" value="20261000669" oninput="calc()"></div><div class="f"><label>QTN (NG)</label><input id="qtn_ng" type="text" value="99909" oninput="calc()"></div></div>
+      <div class="f"><label>Location (RE)</label><input id="location" type="text" value="PASIR PANJANG WHOLESALE CENTRE BLOCK 12 #01-595" oninput="calc()"></div>
+    </div>
+    <div class="sec">
+      <div class="stitle">Sizing</div>
+      <div class="mtog"><button class="mb active" id="btn_t" onclick="setSM('T')">Template</button><button class="mb" id="btn_c" onclick="setSM('C')">Custom</button></div>
+      <div id="trow" class="f"><label>Template</label>
+        <select id="tid" onchange="applyTpl()">
+          <option value="12A">12A — 8.5×5×6m</option><option value="12B">12B — 8.5×8.15×6m</option>
+          <option value="12C">12C — 8.5×11×6m</option><option value="15A">15A — 8.5×6×6m</option>
+          <option value="15B">15B — 8.5×8×6m</option><option value="15C">15C — 8.5×11.15×6m</option>
+          <option value="15D">15D — 8.5×14×6m</option>
+        </select>
+      </div>
+      <div class="fr3"><div class="f"><label>W (m)</label><input id="width" type="number" step=".1" value="8.5" oninput="calc()"></div><div class="f"><label>D (m)</label><input id="depth" type="number" step=".1" value="5" oninput="calc()"></div><div class="f"><label>H (m)</label><input id="height" type="number" step=".1" value="6" oninput="calc()"></div></div>
+      <div class="fr3"><div class="f"><label>Eff.W</label><input id="eff_w" type="number" step=".1" value="8.5" oninput="calc()"></div><div class="f"><label>Eff.D</label><input id="eff_d" type="number" step=".1" value="5" oninput="calc()"></div><div class="f"><label>Sets</label><input id="sets" type="number" min="1" max="6" value="2" oninput="calc()"></div></div>
+      <div class="f"><label>Panel mm</label><select id="panel_mm" onchange="calc()"><option value="75">75mm</option><option value="100" selected>100mm</option><option value="120">120mm</option></select></div>
+    </div>
+    <div class="sec">
+      <div class="stitle">Load</div>
+      <div class="fr"><div class="f"><label>Type</label><select id="system_type" onchange="calc()"><option value="Chiller">Chiller</option><option value="Freezer">Freezer</option></select></div><div class="f"><label>Ambient °C</label><select id="ambient" onchange="calc()"><option value="30">30°C</option><option value="32">32°C</option><option value="35" selected>35°C</option></select></div></div>
+      <div class="fr"><div class="f"><label>Door Openings</label><select id="door_open" onchange="calc()"><option value="Low">Low</option><option value="Med">Med</option><option value="High" selected>High</option></select></div><div class="f"><label>Product Load</label><select id="product_load" onchange="calc()"><option value="None">None</option><option value="Light">Light</option><option value="Heavy" selected>Heavy</option></select></div></div>
+      <div class="fr"><div class="f"><label>Safety Factor</label><select id="safety_factor" onchange="calc()"><option value="0.10">10%</option><option value="0.15" selected>15%</option><option value="0.20">20%</option></select></div><div class="f"><label>Setpoint °C</label><input id="setpoint" type="number" value="2" oninput="calc()"></div></div>
+      <div class="f"><label>Curtain</label><select id="curtain" onchange="calc()"><option value="Yes" selected>Yes</option><option value="No">No</option></select></div>
+    </div>
+    <div class="sec">
+      <div class="stitle">Door & Extras</div>
+      <div class="fr"><div class="f"><label>Doors</label><input id="num_doors" type="number" value="1" min="1" oninput="calc()"></div><div class="f"><label>Floor Traps</label><input id="floor_trap" type="number" value="1" min="0" oninput="calc()"></div></div>
+      <div class="fr"><div class="f"><label>Door W (m)</label><input id="door_w" type="number" step=".1" value="2.2" oninput="calc()"></div><div class="f"><label>Door H (m)</label><input id="door_h" type="number" step=".1" value="2.65" oninput="calc()"></div></div>
+      <div class="fr"><div class="f"><label>Pipe Run/CU</label><input id="pipe_run" type="number" value="15" oninput="calc()"></div><div class="f"><label>Cable Run/CU</label><input id="cable_run" type="number" value="30" oninput="calc()"></div></div>
+    </div>
+    <div class="sec"><div class="stitle">Workscope</div><div class="tgrid" id="wt"></div></div>
+    <div class="sec"><div class="stitle">Submission</div><div class="tgrid" id="st"></div></div>
+    <div class="sec"><div class="stitle">Fire Rated</div><div class="tgrid" id="ft"></div></div>
+    <div class="sec"><div class="stitle">Other Works</div><div class="tgrid" id="ot"></div></div>
+  </div>
+  <div class="main" id="out"></div>
+</div>
+
+<!-- ══ INTAKE MODAL ══ -->
+<div class="intake-overlay" id="intake">
+  <div class="intake-shell">
+    <div class="prompt-card" id="prompt-card">
+      <div class="prompt-step-ind" id="psteps"></div>
+      <div class="summary-pills" id="spills"></div>
+      <div class="prompt-q" id="pq"></div>
+      <div class="prompt-hint" id="ph"></div>
+      <div id="pbody"></div>
+      <div class="prompt-nav">
+        <button class="pnav-back" id="pback" onclick="promptBack()">← Back</button>
+        <button class="pnav-skip" id="pskip" onclick="promptSkip()">Skip</button>
+        <button class="pnav-next" id="pnext" onclick="promptNext()">Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RATE CARD MODAL ══ -->
+<div class="mover" id="mo_rc">
+  <div class="modal narrow">
+    <div class="mhdr"><div><h2>⚙ Rate Card</h2><p>Edit unit costs — updates apply live</p></div><button class="mclose" onclick="closeRC()">✕</button></div>
+    <div class="mbody"><div id="rc_body"></div></div>
+    <div class="mfoot"><button class="btn btns" onclick="resetRC()">↺ Defaults</button><button class="btn btnp" onclick="closeRC()">✓ Done</button></div>
+  </div>
+</div>
+
+<!-- ══ REPORTS MODAL ══ -->
+<div class="mover" id="mo_rep">
+  <div class="modal">
+    <div class="mhdr"><div><h2>📄 Reports</h2><p id="msub">—</p></div><button class="mclose" onclick="document.getElementById('mo_rep').classList.remove('open')">✕</button></div>
+    <div class="mbody">
+      <div class="tabs">
+        <button class="tab on" onclick="swTab('spec')">📋 Spec Sheet</button>
+        <button class="tab" onclick="swTab('price')">💰 Pricing</button>
+        <button class="tab" onclick="swTab('boq')">📊 Full BOQ</button>
+        <button class="tab" onclick="swTab('dear')">🔗 DEAR Auto</button>
+        <button class="tab" onclick="swTab('bom')">🔩 BOM</button>
+      </div>
+      <div class="tc on" id="tc_spec"></div>
+      <div class="tc" id="tc_price"></div>
+      <div class="tc" id="tc_boq"></div>
+      <div class="tc" id="tc_dear"></div>
+      <div class="tc" id="tc_bom"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btns" onclick="document.getElementById('mo_rep').classList.remove('open')">Close</button>
+      <button class="btn btnp" onclick="printQ()">🖨 Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA TABLES
+// ════════════════════════════════════════════
+const CS=[
+  {hp:4,cu:'GVRM040NSA1D',cp:2585,liq:'3/8"',suc:'5/8"',ev:'SOLO35E366',ep:2260},
+  {hp:6,cu:'GVRM060NSA1D',cp:3210,liq:'1/2"',suc:'3/4"',ev:'SOLO35E466',ep:2775},
+  {hp:8,cu:'GVRM080NSA1D',cp:3735,liq:'1/2"',suc:'7/8"',ev:'SOLO45E347',ep:4405},
+  {hp:10,cu:'GVRM100NSA1D',cp:3880,liq:'1/2"',suc:'7/8"',ev:'SOLO45E347',ep:4405},
+];
+const HPM=[{hp:10,kw:18.4},{hp:8,kw:17},{hp:6,kw:14.8},{hp:4,kw:10.4}];
+const BW={Chiller:55,Freezer:95},DM={Low:1,Med:1.15,High:1.35},AM={30:1,32:1.1,35:1.25};
+const PU={75:.35,100:.25,120:.2},PIM={75:1.1,100:1,120:.95};
+const IDW={Low:6000,Med:9000,High:12000,VeryHigh:15000};
+const PW={None:0,Light:5,Heavy:12},CF={Yes:.8,No:1};
+const TPLS={'12A':{l:8.5,w:5,h:6,s:2},'12B':{l:8.5,w:8.15,h:6,s:2},'12C':{l:8.5,w:11,h:6,s:2},'15A':{l:8.5,w:6,h:6,s:2},'15B':{l:8.5,w:8,h:6,s:2},'15C':{l:8.5,w:11.15,h:6,s:2},'15D':{l:8.5,w:14,h:6,s:2}};
+
+const RC_DEF={
+  'PNL-PIR':{cat:'COLDROOM PANEL',desc:'PIR Panel (Wall + Ceiling)',unit:'m²',cost:60,gm:.2,grant:true},
+  'PNL-FLOOR':{cat:'COLDROOM PANEL',desc:'PIR Floor Slab',unit:'m²',cost:40,gm:.2,grant:true},
+  'SLID-DOOR':{cat:'COLDROOM PANEL',desc:'Sliding Door w Strip Curtain',unit:'item',cost:2200,gm:.2,grant:true},
+  'AUTO-MOTOR':{cat:'COLDROOM PANEL',desc:'Auto Sliding Motor',unit:'item',cost:8000,gm:.2,grant:true},
+  'PNL-COC':{cat:'COLDROOM PANEL',desc:'Panel Submission COC/DOC/FSC-02',unit:'item',cost:400,gm:.2,grant:true},
+  'LIFT':{cat:'COLDROOM PANEL',desc:'Scissor Lift Rental',unit:'day',cost:650,gm:.2,grant:true},
+  'PNL-INSTALL':{cat:'COLDROOM PANEL',desc:'Panel Installation',unit:'m²',cost:30,gm:.2,grant:true},
+  'FLOOR-TRAP':{cat:'COLDROOM PANEL',desc:'Floor Trap (Fixed Price)',unit:'item',cost:480,gm:.2,grant:true},
+  'FLOOR-HEATER':{cat:'FLOOR / WET WORKS',desc:'Floor Heater',unit:'m²',cost:40,gm:.2,grant:true},
+  'CONC-SCREED':{cat:'FLOOR / WET WORKS',desc:'Cement Screed (50mm)',unit:'m²',cost:45,gm:.2,grant:true},
+  'CONC-FLOOR':{cat:'FLOOR / WET WORKS',desc:'Concrete Flooring (125mm)',unit:'m²',cost:90,gm:.2,grant:true},
+  'CONC-RAMP':{cat:'FLOOR / WET WORKS',desc:'Concrete Ramp',unit:'item',cost:1200,gm:.2,grant:true},
+  'CONC-KERB':{cat:'FLOOR / WET WORKS',desc:'Concrete Kerb (300mm)',unit:'m',cost:30,gm:.2,grant:true},
+  'LED-T8-CR':{cat:'ELECTRICAL',desc:'LED Lighting T8 (Coldroom)',unit:'point',cost:145,gm:.2,grant:true},
+  'HIGHBAY':{cat:'ELECTRICAL',desc:'High Bay Light',unit:'point',cost:215,gm:.2,grant:true},
+  'EXIT-EM-LT-CR':{cat:'ELECTRICAL',desc:'Exit & Emergency Light (Coldroom)',unit:'item',cost:150,gm:.2,grant:true},
+  'ISO-32A-AD':{cat:'ELECTRICAL',desc:'SPN 20A Isolator (Auto Door)',unit:'item',cost:240,gm:.2,grant:true},
+  'ISO-32A-FH':{cat:'ELECTRICAL',desc:'SPN 20A Isolator (Floor Heater)',unit:'item',cost:240,gm:.2,grant:true},
+  'ISO-32A-CU':{cat:'ELECTRICAL',desc:'TPN 32A Isolator (CP + CU)',unit:'item',cost:800,gm:.2,grant:true},
+  'CTRL-PANEL':{cat:'ELECTRICAL',desc:'Control Panel',unit:'item',cost:1000,gm:.2,grant:true},
+  'EVD-ICE-FFV':{cat:'REF SYSTEM',desc:'EVD Ice + FFV',unit:'set',cost:850,gm:.2,grant:true},
+  'SUB-GL-MAIN':{cat:'SUBMISSION',desc:'GL Submission (MA+BP+FP)',unit:'item',cost:4160,gm:.2,grant:false},
+  'SUB-GL-AC':{cat:'SUBMISSION',desc:'GL Submission (AC Layout)',unit:'item',cost:1000,gm:.2,grant:false},
+  'SUB-GL-FSC02':{cat:'SUBMISSION',desc:'GL Submission (FSC02)',unit:'item',cost:300,gm:.2,grant:false},
+  'SUB-C2D-LONO':{cat:'SUBMISSION',desc:'C2D Submission (LONO)',unit:'item',cost:1200,gm:.2,grant:false},
+  'SUB-TECH-LEW':{cat:'SUBMISSION',desc:'Technicon (LEW Turn On)',unit:'item',cost:850,gm:.2,grant:false},
+  'FR-PART-NORM':{cat:'FIRE RATED',desc:'1HR FR Partition (Normal)',unit:'item',cost:7500,gm:.2,grant:false},
+  'FR-PART-ROOF':{cat:'FIRE RATED',desc:'1HR FR Partition (Roof)',unit:'item',cost:12500,gm:.2,grant:false},
+  'FR-DR-DL':{cat:'FIRE RATED',desc:'1HR FR Door (Double Leaf)',unit:'item',cost:4800,gm:.2,grant:false},
+  'FR-DR-SL':{cat:'FIRE RATED',desc:'1HR FR Door (Single Leaf)',unit:'item',cost:2800,gm:.2,grant:false},
+  'FR-SH':{cat:'FIRE RATED',desc:'1HR FR Roller Shutter',unit:'item',cost:12000,gm:.2,grant:false},
+  'FR-BR-BASE':{cat:'FIRE RATED',desc:'Brick Base Partition (300mm)',unit:'item',cost:1000,gm:.2,grant:false},
+  'PAINT-TOUCH':{cat:'OTHERS',desc:'Touch Up Paint',unit:'item',cost:350,gm:.2,grant:false},
+  'PAINT-ALL':{cat:'OTHERS',desc:'Painting (Whole Unit)',unit:'item',cost:2000,gm:.2,grant:false},
+  'VIN-FL':{cat:'OTHERS',desc:'Vinyl Flooring',unit:'item',cost:2000,gm:.2,grant:false},
+  'CCTV':{cat:'OTHERS',desc:'CCTV',unit:'item',cost:1500,gm:.2,grant:false},
+  'FE':{cat:'OTHERS',desc:'Fire Extinguisher',unit:'item',cost:150,gm:.2,grant:false},
+  'AC':{cat:'OTHERS',desc:'Aircon',unit:'item',cost:3500,gm:.2,grant:false},
+  'TOILET':{cat:'OTHERS',desc:'Toilet Renovation',unit:'item',cost:5800,gm:.2,grant:false},
+  'SPRINKLER':{cat:'OTHERS',desc:'Sprinkler Works',unit:'item',cost:8000,gm:.2,grant:false},
+};
+let RC=JSON.parse(JSON.stringify(RC_DEF));
+
+const WT=[{k:'PIR Panels',on:true},{k:'Sliding Door',on:true},{k:'Auto Door Motor',on:true},{k:'Floor Heater',on:true},{k:'Concrete Ramp',on:true},{k:'LED Lighting',on:true},{k:'High Bay Light',on:true},{k:'Scissor Lift',on:true},{k:'Strip Curtain',on:true},{k:'Under Grant',on:true}];
+const SBT=[{k:'BP+FP+MA',on:true,sku:'SUB-GL-MAIN'},{k:'AC Layout',on:true,sku:'SUB-GL-AC'},{k:'FSC-02',on:true,sku:'SUB-GL-FSC02'},{k:'C2D (LONO)',on:true,sku:'SUB-C2D-LONO'},{k:'Technicon',on:true,sku:'SUB-TECH-LEW'}];
+const FT=[{k:'FR Partition (N)',on:true,sku:'FR-PART-NORM'},{k:'FR Partition (R)',on:false,sku:'FR-PART-ROOF'},{k:'FR Door (DL)',on:false,sku:'FR-DR-DL'},{k:'FR Door (SL)',on:true,sku:'FR-DR-SL'},{k:'Roller Shutter',on:true,sku:'FR-SH'},{k:'Brick Base',on:true,sku:'FR-BR-BASE'},{k:'Touch Up Paint',on:true,sku:'PAINT-TOUCH'}];
+const OT=[{k:'Fire Extinguisher',on:true,sku:'FE'},{k:'Aircon',on:false,sku:'AC'},{k:'Painting Works',on:false,sku:'PAINT-ALL'},{k:'Vinyl Floor',on:false,sku:'VIN-FL'},{k:'CCTV',on:false,sku:'CCTV'},{k:'Toilet Reno',on:false,sku:'TOILET'},{k:'Sprinkler',on:false,sku:'SPRINKLER'}];
+
+let MODE='T', LR=null;
+
+// ════════════════════════════════════════════
+// INTAKE PROMPT FLOW
+// ════════════════════════════════════════════
+const PROMPTS=[
+  {
+    id:'client',
+    q:"Who is this coldroom for?",
+    hint:"Client name, block and unit number",
+    type:'inputs',
+    fields:[
+      {id:'p_client',label:'Client Name',placeholder:'e.g. Luck Beng Vegetable Wholesaler',span:3},
+      {id:'p_block',label:'Block No.',placeholder:'12',span:1},
+      {id:'p_unit',label:'Unit No.',placeholder:'01-595',span:1},
+      {id:'p_attn',label:'Attn (Contact)',placeholder:'Name',span:1},
+    ],
+    cols:3,
+    skippable:false,
+    pill:d=>`${d.p_client||'Client'}`,
+  },
+  {
+    id:'refs',
+    q:"Any reference numbers or date?",
+    hint:"Quotation numbers and project date",
+    type:'inputs',
+    fields:[
+      {id:'p_qg',label:'QTN No. (Grant)',placeholder:'20261000669',span:1},
+      {id:'p_qn',label:'QTN No. (Non-Grant)',placeholder:'99909',span:1},
+      {id:'p_date',label:'Date',placeholder:'',span:1,inputType:'date'},
+      {id:'p_loc',label:'Location (RE line)',placeholder:'Pasir Panjang Wholesale Centre Block 12',span:3},
+    ],
+    cols:3,
+    skippable:true,
+    pill:d=>`QTN ${d.p_qg||'—'}`,
+  },
+  {
+    id:'sysType',
+    q:"What type of coldroom is this?",
+    hint:"This determines the base refrigeration load",
+    type:'options',
+    opts:[
+      {v:'Chiller',label:'Chiller',sub:'+2°C to +8°C — fresh produce, vegetables, dairy'},
+      {v:'Freezer',label:'Freezer',sub:'-18°C to -22°C — frozen goods, seafood, meat'},
+    ],
+    skippable:false,
+    pill:d=>d.sysType,
+  },
+  {
+    id:'sizing',
+    q:"How big is the coldroom?",
+    hint:"Choose a standard template or enter custom dimensions",
+    type:'sizing',
+    skippable:false,
+    pill:d=>d.sizing==='T'?`Template ${d.tpl}`:`${d.cW}×${d.cD}×${d.cH}m`,
+  },
+  {
+    id:'setpoint',
+    q:"What's the room setpoint?",
+    hint:"Target temperature inside the coldroom (°C)",
+    type:'options',
+    opts:[
+      {v:'2',label:'+2°C',sub:'Standard chiller — vegetables & fruits'},
+      {v:'4',label:'+4°C',sub:'Dairy, beverages, general fresh'},
+      {v:'-18',label:'-18°C',sub:'Standard freezer — frozen goods'},
+      {v:'-22',label:'-22°C',sub:'Deep freeze — seafood, ice cream'},
+    ],
+    skippable:true,
+    pill:d=>`${d.setpoint}°C`,
+  },
+  {
+    id:'ambient',
+    q:"What's the surrounding temperature?",
+    hint:"Outdoor / machine room ambient temperature",
+    type:'options',
+    opts:[
+      {v:'30',label:'30°C',sub:'Air-conditioned surroundings'},
+      {v:'32',label:'32°C',sub:'Moderate — shaded outdoor'},
+      {v:'35',label:'35°C',sub:'Hot — direct sun, Singapore standard'},
+    ],
+    skippable:false,
+    pill:d=>`${d.ambient}°C ambient`,
+  },
+  {
+    id:'doorLoad',
+    q:"How busy are the door openings?",
+    hint:"Affects infiltration load calculation",
+    type:'options',
+    opts:[
+      {v:'Low',label:'Low',sub:'< 5 openings/hr — light traffic'},
+      {v:'Med',label:'Medium',sub:'5–15 openings/hr — moderate'},
+      {v:'High',label:'High',sub:'15+ openings/hr — busy wholesale'},
+    ],
+    skippable:false,
+    pill:d=>`${d.doorLoad} traffic`,
+  },
+  {
+    id:'productLoad',
+    q:"How heavy is the product load?",
+    hint:"How much warm product is loaded daily",
+    type:'options',
+    opts:[
+      {v:'None',label:'None',sub:'Storage only, no fresh loading'},
+      {v:'Light',label:'Light',sub:'Small batches daily'},
+      {v:'Heavy',label:'Heavy',sub:'Large daily turnover — wholesale'},
+    ],
+    skippable:false,
+    pill:d=>`${d.productLoad} product load`,
+  },
+  {
+    id:'door',
+    q:"Tell us about the door",
+    hint:"Number of doors and their dimensions",
+    type:'inputs',
+    fields:[
+      {id:'p_nd',label:'No. of Doors',placeholder:'1',span:1,inputType:'number'},
+      {id:'p_dw',label:'Door Width (m)',placeholder:'2.2',span:1,inputType:'number'},
+      {id:'p_dh',label:'Door Height (m)',placeholder:'2.65',span:1,inputType:'number'},
+    ],
+    cols:3,
+    skippable:true,
+    pill:d=>`${d.p_nd||1} door(s) ${d.p_dw||2.2}×${d.p_dh||2.65}m`,
+  },
+  {
+    id:'workscope',
+    q:"What's included in the workscope?",
+    hint:"Toggle everything that applies to this project",
+    type:'toggles',
+    skippable:false,
+    pill:d=>`Workscope set`,
+  },
+];
+
+let PSTEP=0, PDATA={};
+
+function openIntake(){
+  PSTEP=0;PDATA={};
+  document.getElementById('intake').classList.add('open');
+  renderPrompt();
+}
+function closeIntake(){document.getElementById('intake').classList.remove('open');}
+
+function renderPrompt(){
+  const p=PROMPTS[PSTEP];
+  const card=document.getElementById('prompt-card');
+  card.classList.remove('prompt-out');
+  void card.offsetWidth;
+  card.style.animation='none';void card.offsetWidth;
+  card.style.animation='';
+
+  // Progress indicators
+  let stepsH='';
+  PROMPTS.forEach((_,i)=>stepsH+=`<div class="psi ${i<PSTEP?'done':i===PSTEP?'active':''}"></div>`);
+  document.getElementById('psteps').innerHTML=stepsH;
+
+  // Summary pills
+  let pillsH='';
+  PROMPTS.slice(0,PSTEP).forEach(pr=>{
+    if(pr.pill){const txt=pr.pill(PDATA);if(txt)pillsH+=`<div class="spill"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>${txt}</div>`;}
+  });
+  document.getElementById('spills').innerHTML=pillsH;
+
+  document.getElementById('pq').textContent=p.q;
+  document.getElementById('ph').textContent=p.hint;
+  document.getElementById('pback').style.display=PSTEP===0?'none':'';
+  document.getElementById('pskip').style.display=p.skippable?'':'none';
+
+  const isLast=PSTEP===PROMPTS.length-1;
+  document.getElementById('pnext').textContent=isLast?'❄️ Calculate Coldroom →':'Continue →';
+
+  let bodyH='';
+  if(p.type==='options'){
+    const cols=p.opts.length<=2?'cols2':'cols3';
+    bodyH=`<div class="opt-grid ${cols}">`;
+    p.opts.forEach(o=>{
+      const sel=PDATA[p.id]===o.v;
+      bodyH+=`<div class="opt${sel?' selected':''}" onclick="selectOpt('${p.id}','${o.v}',this)"><div class="opt-label">${o.label}</div><div class="opt-sub">${o.sub}</div></div>`;
+    });
+    bodyH+=`</div>`;
+  } else if(p.type==='inputs'){
+    const c=p.cols||2;
+    bodyH=`<div class="prompt-input-row c${c}>`;
+    p.fields.forEach(f=>{
+      const val=PDATA[f.id]||'';
+      bodyH+=`<div class="inp-wrap" style="grid-column:span ${f.span||1}"><label>${f.label}</label><input class="prompt-input" id="${f.id}" type="${f.inputType||'text'}" placeholder="${f.placeholder}" value="${val}" oninput="PDATA['${f.id}']=this.value"></div>`;
+    });
+    bodyH+=`</div>`;
+  } else if(p.type==='sizing'){
+    const isTpl=PDATA.sizing!=='C';
+    bodyH=`
+    <div class="opt-grid cols2" style="margin-bottom:12px">
+      <div class="opt${isTpl?' selected':''}" onclick="selectSizing('T',this)"><div class="opt-label">📐 Standard Template</div><div class="opt-sub">Pick from 7 common PPWC sizes</div></div>
+      <div class="opt${!isTpl?' selected':''}" onclick="selectSizing('C',this)"><div class="opt-label">✏️ Custom Dimensions</div><div class="opt-sub">Enter exact W × D × H</div></div>
+    </div>
+    <div id="tpl_opts" style="${!isTpl?'display:none':''}">
+      <div class="opt-grid cols2" id="tpl_grid"></div>
+    </div>
+    <div id="custom_dims" style="${isTpl?'display:none':''}">
+      <div class="prompt-input-row c3">
+        <div class="inp-wrap"><label>Width (m)</label><input class="prompt-input" id="p_cW" type="number" step=".1" value="${PDATA.cW||8.5}" oninput="PDATA.cW=parseFloat(this.value)"></div>
+        <div class="inp-wrap"><label>Depth (m)</label><input class="prompt-input" id="p_cD" type="number" step=".1" value="${PDATA.cD||5}" oninput="PDATA.cD=parseFloat(this.value)"></div>
+        <div class="inp-wrap"><label>Height (m)</label><input class="prompt-input" id="p_cH" type="number" step=".1" value="${PDATA.cH||6}" oninput="PDATA.cH=parseFloat(this.value)"></div>
+      </div>
+      <div class="prompt-input-row c2" style="margin-top:8px">
+        <div class="inp-wrap"><label>Effective W (m)</label><input class="prompt-input" id="p_eW" type="number" step=".1" value="${PDATA.eW||8.5}" oninput="PDATA.eW=parseFloat(this.value)"></div>
+        <div class="inp-wrap"><label>Effective D (m)</label><input class="prompt-input" id="p_eD" type="number" step=".1" value="${PDATA.eD||5}" oninput="PDATA.eD=parseFloat(this.value)"></div>
+        <div class="inp-wrap"><label>No. of Sets</label><input class="prompt-input" id="p_sets" type="number" min="1" max="6" value="${PDATA.sets||2}" oninput="PDATA.sets=parseInt(this.value)"></div>
+      </div>
+    </div>`;
+  } else if(p.type==='toggles'){
+    const allToggles=[...WT,...SBT,...FT,...OT];
+    bodyH=`<div class="ptoggle-grid">`;
+    allToggles.forEach(t=>{
+      bodyH+=`<div class="ptog${t.on?' on':''}" onclick="this.classList.toggle('on');const ta=window._allToggles.find(x=>x.k==='${t.k}');if(ta)ta.on=!ta.on;"><div class="ptog-dot"></div>${t.k}</div>`;
+    });
+    bodyH+=`</div>`;
+    window._allToggles=[...WT,...SBT,...FT,...OT];
+  }
+
+  document.getElementById('pbody').innerHTML=bodyH;
+
+  // Render template grid if needed
+  if(p.type==='sizing'&&isTpl){
+    const tgrid=document.getElementById('tpl_grid');
+    if(tgrid){
+      const entries=[['12A','8.5×5×6m · 2×4HP'],['12B','8.5×8.15×6m · 2×6HP'],['12C','8.5×11×6m · 2×8HP'],['15A','8.5×6×6m · 2×4HP'],['15B','8.5×8×6m · 2×6HP'],['15C','8.5×11.15×6m · 2×8HP'],['15D','8.5×14×6m · 2×8HP']];
+      tgrid.innerHTML=entries.map(([id,sub])=>`<div class="opt${PDATA.tpl===id?' selected':''}" onclick="selectTpl('${id}',this)"><div class="opt-label">${id}</div><div class="opt-sub">${sub}</div></div>`).join('');
+    }
+  }
+}
+
+function selectOpt(key,val,el){
+  PDATA[key]=val;
+  el.closest('.opt-grid').querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectSizing(mode,el){
+  PDATA.sizing=mode;
+  el.closest('.opt-grid').querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('tpl_opts').style.display=mode==='T'?'':'none';
+  document.getElementById('custom_dims').style.display=mode==='C'?'':'none';
+  if(mode==='T'&&!PDATA.tpl)PDATA.tpl='12A';
+  const tgrid=document.getElementById('tpl_grid');
+  if(mode==='T'&&tgrid){
+    const entries=[['12A','8.5×5×6m · 2×4HP'],['12B','8.5×8.15×6m · 2×6HP'],['12C','8.5×11×6m · 2×8HP'],['15A','8.5×6×6m · 2×4HP'],['15B','8.5×8×6m · 2×6HP'],['15C','8.5×11.15×6m · 2×8HP'],['15D','8.5×14×6m · 2×8HP']];
+    tgrid.innerHTML=entries.map(([id,sub])=>`<div class="opt${PDATA.tpl===id?' selected':''}" onclick="selectTpl('${id}',this)"><div class="opt-label">${id}</div><div class="opt-sub">${sub}</div></div>`).join('');
+  }
+}
+function selectTpl(id,el){
+  PDATA.tpl=id;
+  el.closest('.opt-grid').querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function promptNext(){
+  const p=PROMPTS[PSTEP];
+  // Collect inputs
+  if(p.type==='inputs'&&p.fields){p.fields.forEach(f=>{const el=document.getElementById(f.id);if(el)PDATA[f.id]=el.value;});}
+  if(PSTEP===PROMPTS.length-1){applyIntake();return;}
+  animateTo(PSTEP+1);
+}
+function promptBack(){if(PSTEP>0)animateTo(PSTEP-1);}
+function promptSkip(){if(PSTEP<PROMPTS.length-1)animateTo(PSTEP+1);}
+function animateTo(next){
+  const card=document.getElementById('prompt-card');
+  card.classList.add('prompt-out');
+  setTimeout(()=>{PSTEP=next;card.classList.remove('prompt-out');renderPrompt();},200);
+}
+
+function applyIntake(){
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  sv('client',PDATA.p_client||'');sv('block',PDATA.p_block||'');sv('unit',PDATA.p_unit||'');
+  sv('attn',PDATA.p_attn||'');sv('qdate',PDATA.p_date||'');sv('qtn_grant',PDATA.p_qg||'');
+  sv('qtn_ng',PDATA.p_qn||'');sv('location',PDATA.p_loc||'');
+  sv('system_type',PDATA.sysType||'Chiller');sv('setpoint',PDATA.setpoint||'2');
+  sv('ambient',PDATA.ambient||'35');sv('door_open',PDATA.doorLoad||'High');
+  sv('product_load',PDATA.productLoad||'Heavy');sv('safety_factor','0.15');sv('curtain','Yes');
+  sv('num_doors',PDATA.p_nd||'1');sv('door_w',PDATA.p_dw||'2.2');sv('door_h',PDATA.p_dh||'2.65');
+  sv('floor_trap','1');sv('pipe_run','15');sv('cable_run','30');
+
+  if(PDATA.sizing==='C'){
+    MODE='C';sv('width',PDATA.cW||8.5);sv('depth',PDATA.cD||5);sv('height',PDATA.cH||6);sv('eff_w',PDATA.eW||PDATA.cW||8.5);sv('eff_d',PDATA.eD||PDATA.cD||5);sv('sets',PDATA.sets||2);
+    document.getElementById('trow').style.display='none';document.getElementById('btn_t').className='mb';document.getElementById('btn_c').className='mb active';
+  } else {
+    MODE='T';const tid=PDATA.tpl||'12A';const t=TPLS[tid];sv('tid',tid);
+    if(t){sv('width',t.l);sv('depth',t.w);sv('height',t.h);sv('eff_w',t.l);sv('eff_d',t.w);sv('sets',t.s);}
+    document.getElementById('trow').style.display='';document.getElementById('btn_t').className='mb active';document.getElementById('btn_c').className='mb';
+  }
+  mkToggles(WT,'wt');mkToggles(SBT,'st');mkToggles(FT,'ft');mkToggles(OT,'ot');
+  closeIntake();calc();
+}
+
+// ════════════════════════════════════════════
+// SIDEBAR HELPERS
+// ════════════════════════════════════════════
+function g(id){return parseFloat(document.getElementById(id)?.value)||0;}
+function gs(id){return document.getElementById(id)?.value||'';}
+function tog(k){const t=WT.find(x=>x.k===k);return t?t.on:false;}
+function fmt(n){return'S$'+Math.round(n).toLocaleString();}
+function fN(n){return Math.round(n*100)/100;}
+function setSM(m){MODE=m;document.getElementById('btn_t').className=m==='T'?'mb active':'mb';document.getElementById('btn_c').className=m==='C'?'mb active':'mb';document.getElementById('trow').style.display=m==='T'?'':'none';if(m==='T')applyTpl();else calc();}
+function applyTpl(){const t=TPLS[gs('tid')];if(!t)return;const sv=(id,v)=>document.getElementById(id).value=v;sv('width',t.l);sv('depth',t.w);sv('height',t.h);sv('eff_w',t.l);sv('eff_d',t.w);sv('sets',t.s);calc();}
+function mkToggles(arr,id){const c=document.getElementById(id);if(!c)return;c.innerHTML='';arr.forEach(item=>{const d=document.createElement('div');d.className='ti'+(item.on?' on':'');d.innerHTML=`<div class="tdot"></div>${item.k}`;d.onclick=()=>{item.on=!item.on;d.className='ti'+(item.on?' on':'');calc();};c.appendChild(d);});}
+function catCls(c){return{'COLDROOM PANEL':'cpan','FLOOR / WET WORKS':'cflo','ELECTRICAL':'cele','REF SYSTEM':'cref','SUBMISSION':'csub','FIRE RATED':'cfir','OTHERS':'coth'}[c]||'coth';}
+function catSh(c){return{'COLDROOM PANEL':'PANEL','FLOOR / WET WORKS':'WET WKS','ELECTRICAL':'ELEC','REF SYSTEM':'REF SYS','SUBMISSION':'SUBMIT','FIRE RATED':'FIRE','OTHERS':'OTHER'}[c]||c.slice(0,7);}
+
+// ════════════════════════════════════════════
+// RATE CARD
+// ════════════════════════════════════════════
+function openRC(){
+  let h='<table class="rc-table"><thead><tr><th>SKU</th><th>Description</th><th>Unit</th><th>Cost (S$)</th><th>GM%</th><th>Grant</th></tr></thead><tbody>';
+  let lc='';
+  Object.entries(RC).forEach(([sku,r])=>{
+    if(r.cat!==lc){lc=r.cat;h+=`<tr class="rc-ch"><td colspan="6">${r.cat}</td></tr>`;}
+    h+=`<tr><td style="color:var(--muted);font-size:9px">${sku}</td>
+    <td><input class="rc-input" style="min-width:200px" value="${r.desc}" onchange="RC['${sku}'].desc=this.value;calc()"></td>
+    <td><input class="rc-input" style="width:55px" value="${r.unit}" onchange="RC['${sku}'].unit=this.value;calc()"></td>
+    <td><input class="rc-input" style="width:75px" type="number" value="${r.cost}" onchange="RC['${sku}'].cost=parseFloat(this.value)||0;calc()"></td>
+    <td><input class="rc-input" style="width:50px" type="number" step="1" value="${Math.round(r.gm*100)}" onchange="RC['${sku}'].gm=parseFloat(this.value)/100||0;calc()"></td>
+    <td style="text-align:center"><input type="checkbox" ${r.grant?'checked':''} onchange="RC['${sku}'].grant=this.checked;calc()" style="accent-color:var(--green)"></td></tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('rc_body').innerHTML=h;
+  document.getElementById('mo_rc').classList.add('open');
+}
+function resetRC(){RC=JSON.parse(JSON.stringify(RC_DEF));openRC();calc();}
+function closeRC(){document.getElementById('mo_rc').classList.remove('open');}
+
+// ════════════════════════════════════════════
+// CALCULATION ENGINE
+// ════════════════════════════════════════════
+function calcLoad(){
+  const W=g('eff_w'),D=g('eff_d'),H=g('height');
+  const fa=W*D,wa=2*(W+D)*H,ca=W*D,vol=W*D*H;
+  const pm=parseInt(gs('panel_mm')||100),st=gs('system_type')||'Chiller',amb=parseInt(gs('ambient')||35);
+  const dop=gs('door_open')||'High',pl=gs('product_load')||'Heavy',sf=parseFloat(gs('safety_factor')||.15);
+  const cur=gs('curtain')||'Yes',nd=g('num_doors')||1,sp=g('setpoint')||2;
+  const uaDt=(PU[pm]||.25)*(wa+ca+fa)*(amb-sp);
+  const raw=(uaDt+BW[st]*vol*DM[dop]*PIM[pm]+IDW[dop]*nd*CF[cur]+PW[pl]*vol)/1000;
+  return{load:raw*(1+sf)*AM[amb],fa,wa,ca,vol};
+}
+function selHP(load,sets){const ps=load/sets;for(const r of HPM)if(r.kw>=ps)return r.hp;return 10;}
+function buildRows(hp,car,sets,fa,wa,ca){
+  const ew=g('eff_w'),ed=g('eff_d'),nd=g('num_doors')||1,dw=g('door_w'),dh=g('door_h');
+  const ft=g('floor_trap'),perim=2*(ew+ed),pa=(wa+ca)-(nd*dw*dh),led=Math.max(2,Math.ceil(fa/8));
+  const raw=[];
+  if(tog('PIR Panels')){raw.push({s:'PNL-PIR',q:pa});raw.push({s:'PNL-FLOOR',q:fa});}
+  if(tog('Sliding Door'))raw.push({s:'SLID-DOOR',q:nd});
+  if(tog('Auto Door Motor'))raw.push({s:'AUTO-MOTOR',q:nd});
+  raw.push({s:'PNL-COC',q:1});
+  if(tog('Scissor Lift'))raw.push({s:'LIFT',q:1});
+  if(tog('PIR Panels'))raw.push({s:'PNL-INSTALL',q:pa});
+  if(ft>0)raw.push({s:'FLOOR-TRAP',q:ft});
+  if(tog('Floor Heater')){raw.push({s:'FLOOR-HEATER',q:fa});raw.push({s:'CONC-SCREED',q:fa});}
+  raw.push({s:'CONC-FLOOR',q:fa});
+  if(tog('Concrete Ramp'))raw.push({s:'CONC-RAMP',q:Math.max(1,nd)});
+  raw.push({s:'CONC-KERB',q:perim});
+  if(tog('LED Lighting'))raw.push({s:'LED-T8-CR',q:led});
+  if(tog('High Bay Light'))raw.push({s:'HIGHBAY',q:sets});
+  raw.push({s:'EXIT-EM-LT-CR',q:sets});
+  if(tog('Auto Door Motor'))raw.push({s:'ISO-32A-AD',q:nd});
+  if(tog('Floor Heater'))raw.push({s:'ISO-32A-FH',q:sets});
+  raw.push({s:'ISO-32A-CU',q:sets});raw.push({s:'CTRL-PANEL',q:sets});
+  raw.push({s:car.cu,q:sets,dd:`Condensing Unit — ${car.hp}HP Inverter (Carrier)`,dc:car.cp,cat:'REF SYSTEM'});
+  raw.push({s:car.ev,q:sets,dd:'Evaporator / Cooler Unit (Carrier)',dc:car.ep,cat:'REF SYSTEM'});
+  raw.push({s:'EVD-ICE-FFV',q:sets});
+  SBT.forEach(x=>{if(x.on)raw.push({s:x.sku,q:1});});
+  FT.forEach(x=>{if(x.on)raw.push({s:x.sku,q:1});});
+  OT.forEach(x=>{if(x.on)raw.push({s:x.sku,q:1});});
+  return raw.map(i=>{
+    let r=RC[i.s];
+    if(!r&&i.dc!==undefined)r={cat:i.cat,desc:i.dd,unit:'set',cost:i.dc,gm:.2,grant:true};
+    if(!r)return null;
+    const cost=i.dc!==undefined?i.dc:r.cost,tot=cost*i.q,tgm=tot/(1-r.gm);
+    return{sku:i.s,cat:r.cat,desc:i.dd||r.desc,unit:r.unit,qty:i.q,cost,tot,gm:r.gm,tgm,grant:r.grant};
+  }).filter(Boolean);
+}
+
+function calc(){
+  const{load,fa,wa,ca,vol}=calcLoad();
+  const sets=g('sets')||2,hp=selHP(load,sets),car=CS.find(x=>x.hp===hp)||CS[0];
+  const rows=buildRows(hp,car,sets,fa,wa,ca);
+  const gt=rows.reduce((s,r)=>s+r.tgm,0),grantT=rows.filter(r=>r.grant).reduce((s,r)=>s+r.tgm,0);
+  LR={load,fa,wa,ca,vol,sets,hp,car,rows,gt,grantT};
+  const ps=load/sets;
+  const ct={};rows.forEach(row=>{if(!ct[row.cat])ct[row.cat]=0;ct[row.cat]+=row.tgm;});
+  let h=`<div class="rgrid">
+    <div class="kpi"><div class="kl">Est. Load</div><div class="kv">${fN(load)}<span>kW</span></div><div class="ks">${fN(ps)} kW/set</div></div>
+    <div class="kpi g"><div class="kl">HP Selected</div><div class="kv">${hp}<span>HP</span></div><div class="ks">${sets}×${hp}HP = ${sets*hp}HP total</div></div>
+    <div class="kpi o"><div class="kl">Floor Area</div><div class="kv">${fN(fa)}<span>m²</span></div><div class="ks">Vol ${fN(vol)} m³</div></div>
+    <div class="kpi p"><div class="kl">Grand Total</div><div class="kv">${fmt(gt)}</div><div class="ks">incl. 20% GM</div></div>
+  </div>
+  <div class="sbar">
+    <div class="si"><span class="sl">CU</span><span class="sv">${car.cu}</span></div>
+    <div class="si"><span class="sl">EV</span><span class="sv">${car.ev}</span></div>
+    <div class="si"><span class="sl">Liquid</span><span class="sv">${car.liq}</span></div>
+    <div class="si"><span class="sl">Suction</span><span class="sv">${car.suc}</span></div>
+    <div class="si"><span class="sl">Sets</span><span class="sv">${sets}</span></div>
+    <div class="si"><span class="sl">Ref.</span><span class="sv">R410A</span></div>
+  </div>
+  <div class="bwrap">
+    <div class="bhdr"><div class="btitle">BILL OF QUANTITIES</div><div class="bcnt">${rows.length} items</div><div class="btot">${fmt(gt)}</div></div>
+    <table><thead><tr><th style="width:82px">Category</th><th>Description</th><th>SKU</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Cost</th><th style="text-align:right">Total</th><th style="text-align:right">w/GM</th><th style="text-align:center">Grant</th></tr></thead><tbody>`;
+  let lc='';
+  rows.forEach(row=>{
+    if(row.cat!==lc){lc=row.cat;h+=`<tr><td colspan="9" class="sdiv">${row.cat} — ${fmt(ct[row.cat])}</td></tr>`;}
+    h+=`<tr><td><span class="cb ${catCls(row.cat)}">${catSh(row.cat)}</span></td><td style="color:var(--text)">${row.desc}</td><td style="color:var(--muted);font-size:9px">${row.sku}</td><td>${row.unit}</td><td style="text-align:right">${fN(row.qty)}</td><td style="text-align:right">${fmt(row.cost)}</td><td style="text-align:right">${fmt(row.tot)}</td><td style="text-align:right;font-weight:600;color:var(--text)">${fmt(row.tgm)}</td><td style="text-align:center"><span class="${row.grant?'gy':'gn'}">${row.grant?'✓':'—'}</span></td></tr>`;
+  });
+  h+=`</tbody><tfoot><tr class="grow"><td colspan="7" style="color:var(--label);font-size:9px;font-family:var(--mono)">GRAND TOTAL (incl. 20% GM)</td><td class="tg" style="text-align:right">${fmt(gt)}</td><td></td></tr></tfoot></table></div>`;
+  document.getElementById('out').innerHTML=h;
+}
+
+// ════════════════════════════════════════════
+// REPORTS
+// ════════════════════════════════════════════
+function openReports(){
+  if(!LR){alert('Run a calculation first.');return;}
+  const r=LR,cl=gs('client'),bl=gs('block'),un=gs('unit'),at=gs('attn');
+  const qd=gs('qdate'),loc=gs('location'),qg=gs('qtn_grant'),qn=gs('qtn_ng');
+  const pm=gs('panel_mm')||'100',st=gs('system_type')||'Chiller',sp=g('setpoint');
+  const dw=g('door_w'),dh=g('door_h'),nd=g('num_doors')||1,ft=g('floor_trap');
+  const ug=WT.find(x=>x.k==='Under Grant').on;
+  const addr=`BLK ${bl}, #${un}`;
+  const ds=qd?new Date(qd).toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'});
+  const gst=r.gt*.09,gwg=r.gt+gst,grA=r.grantT*.5,net=gwg-grA;
+  const spr=st==='Chiller'?`+${sp} to +${sp+4} °C`:'-18 to -22 °C';
+  const dim=`W${Math.round(g('width')*1000)} x D${Math.round(g('depth')*1000)} x H${Math.round(g('height')*1000)}mm`;
+  const door=`W${Math.round(dw*1000)} x H${Math.round(dh*1000)}mm`;
+  document.getElementById('msub').textContent=`${cl} · ${ds} · ${qg}`;
+
+  // SPEC
+  let si='';
+  if(tog('PIR Panels'))si+=`<div class="dss">B1.1) To supply and install PIR Insulation for Coldroom</div><div class="dbul">${pm}mm thick PIR Panel (Walls &amp; Ceiling)</div><div class="dbul">${pm}mm thick PIR Slab (Floor)</div>`;
+  if(tog('Sliding Door'))si+=`<div class="dss">B1.2) To supply and install Coldroom Door w/ Strip Curtain</div><div class="dbul">Auto Sliding Door — Opening: ${door}</div>${tog('Strip Curtain')?'<div class="dbul">Strip Curtain for each door opening</div>':''}`;
+  if(tog('Floor Heater'))si+=`<div class="dss">B1.3) Floor Heaters (running and backup)</div><div class="dbul">2 sets floor heaters + 30mm Cement Screed</div>`;
+  si+=`<div class="dss">B1.4) Wet Work &amp; Flooring</div><div class="dbul">125mm thick Concrete Slab with RC reinforcement</div><div class="dbul">D100×H300mm Concrete Kerb around perimeter</div>${tog('Concrete Ramp')?'<div class="dbul">Concrete Ramp at door entrance</div>':''}`;
+  if(tog('LED Lighting'))si+=`<div class="dss">B1.5) LED Lighting for Coldroom</div>`;
+  si+=`<div class="dss">B1.6) Submission Documents — COC, DOC, FSC02</div>`;
+
+  document.getElementById('tc_spec').innerHTML=`<div class="doc">
+  <div class="dlh"><div class="dco">TY INNOVATIONS PTE LTD</div><div class="dtag">Coldroom &amp; Refrigeration Specialists</div></div>
+  <div class="dto-b"><div class="dto"><div class="dlbl">To:</div><div class="dval"><strong>${cl}</strong></div><div class="dval">${addr}, SINGAPORE</div><div style="margin-top:6px"><div class="dlbl">Attn:</div><div class="dval">${at}</div></div></div>
+  <div class="dref"><div class="dlbl">Ref QTN:</div><div class="dval">${qg}</div><div style="margin-top:6px"><div class="dlbl">Date:</div><div class="dval">${ds}</div></div></div></div>
+  <div class="dre">RE: COLDROOM DETAIL SPECIFICATIONS AT ${loc.toUpperCase()}</div>
+  <div class="dint">We thank you for your enquiry and would like to submit our proposal for your consideration.</div>
+  <div class="dsec">A) Coldroom Requirement</div>
+  <table class="dtab"><thead><tr><th>S/N</th><th>Type</th><th>Dimensions</th><th>Temperature</th><th>Door</th></tr></thead>
+  <tbody><tr><td>1</td><td>${st}</td><td>${dim}</td><td>${spr}</td><td>${nd}× Auto Sliding<br>${door}</td></tr></tbody></table>
+  <div style="font-size:10px;color:#666;margin-bottom:12px">* Surrounding climate: +32°C, RH 60% or below</div>
+  <div class="dsec">B) Workscope</div><div class="dss" style="color:#003366">B1) Structure</div>${si}
+  <div class="dhr"></div><div class="dss" style="color:#003366">B2) Refrigeration</div>
+  <div style="font-size:11px;margin-bottom:6px">To supply and install refrigeration system</div>
+  <div class="dss">B2.1) Condensing Unit</div><div class="dbul">${r.sets}× ${r.hp}HP Inverter CU — ${r.car.cu}</div>
+  <div class="dss">B2.2) Evaporator Unit</div><div class="dbul">${r.sets}× Cooler c/w EEV — ${r.car.ev}</div>
+  <div class="dss">B2.3) Control Panel</div><div class="dbul">${r.sets}× Custom Control Panel with EVD Driver</div>
+  <div class="dss">B2.4) Materials</div>
+  <div class="dbul">Piping — Liquid: ${r.car.liq} / Suction: ${r.car.suc} — with insulation</div>
+  <div class="dbul">${r.sets} lot R410A Refrigerant · GI racking for CU · ${ft} floor trap(s)</div>
+  <div class="dhr"></div><div class="dsec">C) Exclusions</div>
+  <div class="dbul">Excludes work not mentioned in the above workscope.</div></div>`;
+
+  // PRICE
+  const ct={};r.rows.forEach(row=>{if(!ct[row.cat])ct[row.cat]=0;ct[row.cat]+=row.tgm;});
+  let catR='';Object.entries(ct).forEach(([c,v])=>{catR+=`<div class="dsr"><span>${c}</span><span>${fmt(v)}</span></div>`;});
+  document.getElementById('tc_price').innerHTML=`<div class="doc">
+  <div class="dlh"><div class="dco">TY INNOVATIONS PTE LTD</div><div class="dtag">Coldroom &amp; Refrigeration Specialists</div></div>
+  <div class="dto-b"><div class="dto"><div class="dlbl">To:</div><div class="dval"><strong>${cl}</strong></div><div class="dval">${addr}</div><div style="margin-top:6px"><div class="dlbl">Attn:</div><div class="dval">${at}</div></div></div>
+  <div class="dref"><div class="dlbl">Ref:</div><div class="dval">${qg}</div><div style="margin-top:6px"><div class="dlbl">Date:</div><div class="dval">${ds}</div></div></div></div>
+  <div class="dre">RE: QUOTATION FOR SUPPLY AND INSTALLATION AT ${loc.toUpperCase()}</div>
+  <div class="dint">We thank you for your enquiry and would like to submit our proposal for your consideration.</div>
+  <div class="dsec">Cost Summary</div><div class="dsum">${catR}</div>
+  <div class="dtotbox"><div><div class="dtotlbl">TOTAL PROJECT AMOUNT (excl. GST)</div><div style="font-size:9px;opacity:.7;margin-top:1px">${r.rows.length} items · 20% GM included</div></div><div class="dtotval">${fmt(r.gt)}</div></div>
+  <div class="dsum">
+    <div class="dsr"><span>Total excl. GST (A)</span><span>${fmt(r.gt)}</span></div>
+    <div class="dsr"><span>GST 9% (B)</span><span>${fmt(gst)}</span></div>
+    <div class="dsr tr"><span>Total incl. GST (C = A+B)</span><span>${fmt(gwg)}</span></div>
+    ${ug?`<div class="dsr" style="background:#fff;color:#888;font-size:10px;padding:4px 9px"><em>EDG Grant Reference:</em></div>
+    <div class="dsr gr"><span>EnterpriseSG @50% SME (D)</span><span>${fmt(grA)}</span></div>
+    <div class="dsr gr" style="font-weight:700"><span>Net after Grant (E = C−D)</span><span>${fmt(net)}</span></div>`:''}
+  </div>
+  <div class="dsec">Notes &amp; Terms</div>
+  <ul class="dnl">
+    <li>EDG Grant eligibility subject to Authority Approval</li>
+    <li>Working hours: Mon–Fri 9am–6pm, excl. public holidays</li>
+    <li>Material lead time: approx. 6–8 weeks from deposit</li>
+    <li>Project duration: approx. 4–6 weeks</li>
+    <li>12 months equipment warranty from handover</li>
+    <li>Quotation validity: 30 days · Payment: 50% deposit + 50% claim</li>
+    <li>Deposit non-refundable upon signing</li>
+  </ul>
+  <div class="dsig"><div class="dsigbox">Authorised Signatory / TY INNOVATIONS PTE LTD</div>
+  <div class="dsigbox">Name / Signature / Stamp / Date — I/We accept and confirm</div></div></div>`;
+
+  // BOQ
+  let bh=`<div class="doc"><div class="dlh"><div class="dco">TY INNOVATIONS PTE LTD</div><div class="dtag">Bill of Quantities — ${cl} · ${ds}</div></div>
+  <div style="font-size:10px;color:#555;margin-bottom:9px"><strong>Ref:</strong> ${qg} | <strong>Attn:</strong> ${at} | <strong>Location:</strong> ${loc}</div>
+  <table class="dtab"><thead><tr><th>Cat</th><th>Description</th><th>SKU</th><th>Unit</th><th>Qty</th><th>Cost</th><th>Total</th><th>w/GM</th><th>Grant</th></tr></thead><tbody>`;
+  let lcat='';
+  r.rows.forEach(row=>{
+    if(row.cat!==lcat){lcat=row.cat;bh+=`<tr class="ch"><td colspan="9">${row.cat}</td></tr>`;}
+    bh+=`<tr><td style="font-size:9px">${catSh(row.cat)}</td><td>${row.desc}</td><td style="font-size:9px;color:#666">${row.sku}</td><td>${row.unit}</td><td>${fN(row.qty)}</td><td>${fmt(row.cost)}</td><td>${fmt(row.tot)}</td><td><strong>${fmt(row.tgm)}</strong></td><td style="color:${row.grant?'#006633':'#999'}">${row.grant?'✓':'—'}</td></tr>`;
+  });
+  bh+=`<tr style="background:#003366;color:#fff;font-weight:700"><td colspan="7">GRAND TOTAL</td><td>${fmt(r.gt)}</td><td></td></tr>
+  </tbody></table><div style="margin-top:8px;font-size:10px;color:#666">GST: ${fmt(gst)} | Total incl. GST: ${fmt(gwg)}${ug?` | Net after Grant: ${fmt(net)}`:''}</div></div>`;
+  document.getElementById('tc_boq').innerHTML=bh;
+
+  // DEAR
+  const di=[
+    {no:'1.1',desc:`To supply and install ${pm}mm thick PIR Insulation Panel for Coldroom Wall and Ceiling (Class B)\nApprox Dimension: ${dim}`,qty:1},
+    {no:'1.2',desc:`To supply and install ${pm}mm thick PIR Insulation slab for Coldroom Floor`,qty:1},
+    {no:'1.3',desc:`To supply and install ${pm}mm thick Automatic Sliding door for coldroom w/ door frame heater and strip curtain\nDoor Size: ${door}`,qty:1},
+    {no:'1.4',desc:`To supply and install two set floor heaters (running and backup) for Coldroom w/ 30mm thick cement screed over floor heater`,qty:1},
+    {no:'1.5',desc:`To supply and install 125mm thick concrete slab with BRC reinforcement for Coldroom Flooring`,qty:1},
+    {no:'1.6',desc:`To supply and install 100 x 300mm concrete Kerb around perimeter of coldroom interior`,qty:1},
+    {no:'1.7',desc:`To supply and install 1 lot of LED Lighting for coldroom`,qty:1},
+    {no:'1.8',desc:`To supply and install floor trap for coldroom`,qty:1},
+    {no:'2.1',desc:`To supply and install ${r.hp}HP inverter Outdoor condensing unit\nModel: ${r.car.cu}`,qty:r.sets},
+    {no:'2.2',desc:`To supply and install coldroom evaporator c/w Electronic Expansion Valve\nModel: ${r.car.ev}`,qty:r.sets},
+    {no:'2.3',desc:`To supply and install control panel for coldroom refrigeration`,qty:r.sets},
+    {no:'2.4',desc:`To supply 1 lot of R410A Refrigerant`,qty:r.sets},
+    {no:'2.5',desc:`To supply Galvanized Steel racking for Condensing Unit`,qty:r.sets},
+  ];
+  const dp={};r.rows.forEach(x=>{dp[x.sku]=x.tgm;});const safe=s=>dp[s]||0;
+  di[0].price=Math.round(safe('PNL-PIR')+(safe('PNL-INSTALL')*.75)+safe('LIFT')+safe('PNL-COC'));
+  di[1].price=Math.round(safe('PNL-FLOOR')+(safe('PNL-INSTALL')*.25));
+  di[2].price=Math.round(safe('SLID-DOOR')+safe('AUTO-MOTOR')+safe('ISO-32A-AD')+(safe('FLOOR-HEATER')*.4));
+  di[3].price=Math.round(safe('FLOOR-HEATER')*.6+safe('ISO-32A-FH')+safe('CONC-SCREED'));
+  di[4].price=Math.round(safe('CONC-FLOOR')+safe('CONC-RAMP')+(safe('ISO-32A-CU')+safe('CTRL-PANEL'))*.5);
+  di[5].price=Math.round(safe('CONC-KERB')+safe('EXIT-EM-LT-CR'));
+  di[6].price=Math.round(safe('LED-T8-CR')+safe('HIGHBAY'));
+  di[7].price=Math.round(safe('FLOOR-TRAP'));
+  di[8].price=Math.round((safe(r.car.cu)+safe('EVD-ICE-FFV')+(safe('ISO-32A-CU')+safe('CTRL-PANEL'))*.5)/r.sets);
+  di[9].price=Math.round(safe(r.car.ev)/r.sets+500);
+  di[10].price=Math.round(safe('CTRL-PANEL')/r.sets);
+  di[11].price=230;di[12].price=250;
+  window._di=di;
+  let dearT=0;
+  let dh2=`<div class="doc"><div class="dlh"><div class="dco">TY INNOVATIONS PTE LTD</div><div class="dtag">DEAR — Sales Order Line Items · SKU: SALES-CR · ${cl} · ${ds}</div></div>
+  <p style="font-size:10px;color:#555;margin-bottom:12px">Copy each description into DEAR sales order Comment field. Ref: ${qg}</p>
+  <table class="dear-t"><thead><tr><th>No.</th><th>SKU</th><th>Description</th><th>Qty</th><th>Price (S$)</th><th>Line Total</th><th></th></tr></thead><tbody>`;
+  di.forEach((item,i)=>{const lt=(item.price||0)*item.qty;dearT+=lt;dh2+=`<tr><td style="font-weight:700;color:#003366">${item.no}</td><td style="font-size:9px">SALES-CR</td><td style="white-space:pre-line;font-size:10px">${item.desc}</td><td style="text-align:center">${item.qty}</td><td style="text-align:right">${fmt(item.price||0)}</td><td style="text-align:right"><strong>${fmt(lt)}</strong></td><td><button class="cpybtn" onclick="copyDear(${i})">⎘ Copy</button></td></tr>`;});
+  dh2+=`<tr style="background:#003366;color:#fff;font-weight:700"><td colspan="5">TOTAL</td><td>${fmt(dearT)}</td><td></td></tr></tbody></table></div>`;
+  document.getElementById('tc_dear').innerHTML=dh2;
+
+  // BOM
+  const bom=[
+    {no:1,desc:`Condensing Unit（冷凝机组）\nModel: ${r.car.cu}`,qty:r.sets,unit:'unit'},
+    {no:2,desc:`Cooler Unit（蒸发器）\nModel: ${r.car.ev}`,qty:r.sets,unit:'unit'},
+    {no:3,desc:`Racking for CU（机组架子）`,qty:r.sets,unit:'set'},
+    {no:4,desc:`Refrigerant（冷媒）\nType: R410A`,qty:'1 lot',unit:'lot'},
+    {no:5,desc:`Liquid Filter Drier（过滤器）\nSize: ${r.car.liq}`,qty:r.sets,unit:'pcs'},
+    {no:6,desc:`Expansion Valve（膨胀阀）+ EVD\nType: Electronic`,qty:r.sets,unit:'set'},
+    {no:7,desc:`Orifice（阀芯）\nNo: #24`,qty:r.sets,unit:'pcs'},
+    {no:8,desc:`Flare Nut（喇叭口螺母）\n1 Set`,qty:r.sets,unit:'set'},
+    {no:9,desc:`Compressor Oil（机油）\nType: R410A`,qty:'1 lot',unit:'lot'},
+    {no:10,desc:`Strip Curtain（门帘）\nDoor Size: ${door}`,qty:nd,unit:'set'},
+    {no:11,desc:`Control Panel（控制）\nAK-CC25 Pro`,qty:r.sets,unit:'unit'},
+    {no:12,desc:`Sensor（探头）\nType: NTC`,qty:r.sets*2,unit:'pcs'},
+    {no:13,desc:`Copper Pipe Coil Liquid（铜管-软管）\n${r.car.liq}`,qty:'1 lot',unit:'lot'},
+    {no:14,desc:`Copper Pipe Straight Suction（铜管-直管）\n${r.car.suc}`,qty:'1 lot',unit:'lot'},
+    {no:15,desc:`Copper Elbow Suction（铜管-弯头）\n${r.car.suc}`,qty:'1 lot',unit:'lot'},
+    {no:16,desc:`Pre-insulation Jacketing（铁皮-PU）\n115mm`,qty:'1 lot',unit:'lot'},
+    {no:17,desc:`Single Core Wire（电线）1.5/2.5/6mm`,qty:'1 lot',unit:'lot'},
+    {no:18,desc:`3-Core Wire（电线）Grey`,qty:'1 lot',unit:'lot'},
+    {no:19,desc:`Trunking（线槽）`,qty:'1 lot',unit:'lot'},
+    {no:20,desc:`PIR Panel Wall+Ceiling（冷藏板）\n${pm}mm Class B`,qty:fN(r.wa+r.ca),unit:'m²'},
+    {no:21,desc:`PIR Floor Slab（冷藏地板）\n${pm}mm`,qty:fN(r.fa),unit:'m²'},
+  ];
+  const issued=qd?new Date(qd).toLocaleDateString('en-SG',{day:'numeric',month:'numeric',year:'numeric'}):'';
+  let bomH=`<div class="doc"><div class="dlh"><div class="dco">TY INNOVATIONS PTE LTD</div><div class="dtag">BILL OF MATERIAL (BOM)</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:12px;font-size:11px">
+    <div><strong>Company:</strong> ${cl}</div><div style="text-align:right"><strong>SO (Grant):</strong> ${qg}</div>
+    <div><strong>Address:</strong> ${addr}</div><div style="text-align:right"><strong>SO (Non-Grant):</strong> ${qn}</div>
+    <div><strong>Location:</strong> ${loc}</div><div style="text-align:right"><strong>Issued:</strong> ${issued}</div>
+  </div>
+  <table class="dtab"><thead><tr><th>No.</th><th>Description</th><th>Qty</th><th>Unit</th><th>PR No.</th><th>Date Collected</th></tr></thead><tbody>`;
+  bom.forEach(item=>{bomH+=`<tr><td style="font-weight:700">${item.no}</td><td style="white-space:pre-line;font-size:10px">${item.desc}</td><td style="text-align:center">${item.qty}</td><td>${item.unit}</td><td></td><td></td></tr>`;});
+  bomH+=`</tbody></table>
+  <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:40px">
+    <div style="border-top:1px solid #999;padding-top:6px;font-size:9px;color:#666;text-align:center">Prepared by / Date</div>
+    <div style="border-top:1px solid #999;padding-top:6px;font-size:9px;color:#666;text-align:center">Checked by / Date</div>
+  </div></div>`;
+  document.getElementById('tc_bom').innerHTML=bomH;
+
+  document.getElementById('mo_rep').classList.add('open');
+}
+
+function copyDear(i){
+  const item=window._di&&window._di[i];if(!item)return;
+  navigator.clipboard.writeText(item.desc).then(()=>{
+    const btns=document.querySelectorAll('.cpybtn');
+    if(btns[i]){btns[i].textContent='✓ Copied';setTimeout(()=>{btns[i].innerHTML='⎘ Copy';},1600);}
+  }).catch(()=>{const t=document.createElement('textarea');t.value=item.desc;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);});
+}
+function swTab(t){
+  const tabs=['spec','price','boq','dear','bom'];
+  document.querySelectorAll('#mo_rep .tab').forEach((b,i)=>b.className='tab'+(tabs[i]===t?' on':''));
+  tabs.forEach(id=>document.getElementById('tc_'+id).className='tc'+(id===t?' on':''));
+}
+
+const PSTYLES=`*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fff;color:#111;}
+.doc{padding:32px 38px;max-width:720px;margin:0 auto;}.dlh{border-bottom:3px solid #003366;padding-bottom:11px;margin-bottom:15px;}
+.dco{font-size:17px;font-weight:700;color:#003366;}.dtag{font-size:10px;color:#666;margin-top:2px;}
+.dto-b{display:grid;grid-template-columns:1fr 1fr;margin-bottom:11px;}.dto,.dref{padding:7px 0;}.dref{text-align:right;}
+.dlbl{font-size:9px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.5px;}.dval{font-size:11px;color:#222;margin-top:2px;}
+.dre{background:#f0f6ff;border-left:3px solid #003366;padding:6px 10px;margin-bottom:13px;font-size:11px;font-weight:600;color:#003366;}
+.dint{font-size:11px;color:#333;margin-bottom:11px;}.dsec{font-size:11px;font-weight:700;color:#003366;margin:12px 0 4px;text-transform:uppercase;}
+.dss{font-size:11px;font-weight:700;color:#222;margin:8px 0 3px;}.dbul{font-size:11px;color:#333;padding-left:14px;margin-bottom:2px;}.dbul::before{content:'— ';color:#666;}
+.dtab{width:100%;border-collapse:collapse;margin:7px 0;font-size:10px;}.dtab th{background:#003366;color:#fff;padding:5px 8px;text-align:left;font-size:9px;}.dtab th:last-child,.dtab td:last-child{text-align:right;}
+.dtab td{padding:4px 8px;border-bottom:1px solid #e8e8e8;color:#333;white-space:pre-line;}.dtab tr:nth-child(even) td{background:#f9f9f9;}.dtab tr.ch td{background:#e8f0ff;font-weight:700;font-size:9px;color:#003366;text-transform:uppercase;}
+.dtotbox{background:#003366;color:#fff;padding:9px 13px;border-radius:5px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;}.dtotlbl{font-size:10px;font-weight:700;}.dtotval{font-size:14px;font-weight:700;}
+.dsum{margin:9px 0;}.dsr{display:flex;justify-content:space-between;padding:4px 8px;font-size:10px;}.dsr:nth-child(odd){background:#f9f9f9;}.dsr.tr{background:#003366;color:#fff;font-weight:700;font-size:11px;}.dsr.gr{background:#e8f8f0;color:#006633;}
+.dnl{padding-left:0;list-style:none;}.dnl li{padding:2px 0 2px 12px;font-size:10px;color:#444;position:relative;}.dnl li::before{content:'•';position:absolute;left:0;color:#003366;}
+.dsig{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:32px;}.dsigbox{border-top:1px solid #999;padding-top:6px;font-size:9px;color:#666;text-align:center;}.dhr{border:none;border-top:1px solid #ddd;margin:11px 0;}
+.dear-t{width:100%;border-collapse:collapse;font-size:11px;}.dear-t th{background:#003366;color:#fff;padding:5px 8px;text-align:left;font-size:9px;}.dear-t td{padding:4px 8px;border-bottom:1px solid #e8e8e8;vertical-align:top;color:#333;white-space:pre-line;}.dear-t tr:nth-child(even) td{background:#f9f9f9;}
+.cpybtn{display:none;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}`;
+function printQ(){const ac=document.querySelector('#mo_rep .tc.on');if(!ac)return;const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report — ${gs('client')}</title><style>${PSTYLES}</style></head><body>${ac.innerHTML}</body></html>`);w.document.close();setTimeout(()=>w.print(),400);}
+
+document.getElementById('mo_rep').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('mo_rc').addEventListener('click',function(e){if(e.target===this)closeRC();});
+document.getElementById('intake').addEventListener('click',function(e){if(e.target===this)closeIntake();});
+
+// INIT
+mkToggles(WT,'wt');mkToggles(SBT,'st');mkToggles(FT,'ft');mkToggles(OT,'ot');
+setSM('T');applyTpl();calc();
+</script>
+</body>
+</html>
