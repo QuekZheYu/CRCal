@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TY Innovations — PM Cost Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --paper: #faf7f2;
+  --white: #ffffff;
+  --ink: #1a1714;
+  --ink2: #3d3730;
+  --ink3: #6b6259;
+  --rule: #ddd5c8;
+  --rule2: #e8e0d4;
+  --orange: #c94f1a;
+  --orange-light: #f5e6de;
+  --green: #2a6b3f;
+  --green-light: #e3f0e8;
+  --red: #b52929;
+  --red-light: #f5e3e3;
+  --blue: #1a3d6b;
+  --blue-light: #e3ecf5;
+  --gold: #a07c30;
+  --gold-light: #f5edd8;
+  --purple: #5e3a8c;
+  --purple-light: #f0eaf8;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Playfair Display', serif;
+  --shadow: 0 1px 3px rgba(26,23,20,0.08), 0 4px 16px rgba(26,23,20,0.04);
+  --shadow-md: 0 2px 8px rgba(26,23,20,0.10), 0 8px 32px rgba(26,23,20,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--cream); color: var(--ink); font-family: var(--sans); font-size: 13px; line-height: 1.5; min-height: 100vh; }
+
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar { width: 236px; min-width: 236px; background: var(--ink); display: flex; flex-direction: column; overflow-y: auto; }
+.sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+.logo-name { font-family: var(--display); font-size: 18px; color: #fff; line-height: 1.2; }
+.logo-sub { font-size: 10px; color: rgba(255,255,255,0.35); font-family: var(--mono); margin-top: 3px; }
+.sb-section { padding: 18px 20px 6px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.22); font-family: var(--mono); }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 500; border-left: 3px solid transparent; transition: all 0.12s; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.04); }
+.nav-item.active { color: #fff; border-left-color: var(--orange); background: rgba(201,79,26,0.12); }
+.proj-list { padding: 6px 12px; flex: 1; overflow-y: auto; }
+.proj-card { padding: 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.06); transition: all 0.12s; }
+.proj-card:hover { background: rgba(255,255,255,0.05); }
+.proj-card.active { background: rgba(201,79,26,0.15); border-color: rgba(201,79,26,0.3); }
+.pc-id { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 2px; }
+.pc-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.82); }
+.pc-gp { font-family: var(--mono); font-size: 10px; margin-top: 5px; display: flex; align-items: center; gap: 6px; }
+.chip { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 9px; font-weight: 600; letter-spacing: 0.04em; font-family: var(--mono); text-transform: uppercase; }
+.chip-green { background: rgba(42,107,63,0.28); color: #6dbb8a; }
+.chip-orange { background: rgba(201,79,26,0.28); color: #e8885a; }
+.chip-red { background: rgba(181,41,41,0.28); color: #e87a7a; }
+.chip-blue { background: rgba(26,61,107,0.28); color: #7aaae0; }
+.add-proj-btn { margin: 10px 12px 14px; padding: 10px; border-radius: 6px; cursor: pointer; border: 1px dashed rgba(255,255,255,0.14); color: rgba(255,255,255,0.3); font-size: 12px; text-align: center; font-weight: 500; transition: all 0.12s; }
+.add-proj-btn:hover { border-color: var(--orange); color: #e8885a; background: rgba(201,79,26,0.08); }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; background: var(--cream); display: flex; flex-direction: column; }
+
+/* PAGE HEADER */
+.page-hdr { background: var(--paper); border-bottom: 2px solid var(--rule); padding: 24px 32px 20px; display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; }
+.hdr-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+.hdr-title { font-family: var(--display); font-size: 26px; color: var(--ink); line-height: 1.1; }
+.hdr-meta { font-size: 11px; color: var(--ink3); font-family: var(--mono); margin-top: 5px; }
+.hdr-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* BUTTONS */
+.btn { padding: 9px 18px; border-radius: 4px; font-family: var(--sans); font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.12s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-primary:hover { background: #b04215; }
+.btn-secondary { background: var(--white); color: var(--ink2); border: 1.5px solid var(--rule); }
+.btn-secondary:hover { border-color: var(--ink3); }
+.btn-ghost { background: transparent; color: var(--ink3); border: 1px solid var(--rule); }
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink3); }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #e8c4c4; }
+.btn-danger:hover { background: #eecfcf; }
+.btn-green { background: var(--green-light); color: var(--green); border: 1px solid #b8d9c4; }
+.btn-green:hover { background: #d4eadc; }
+.btn-sm { padding: 5px 11px; font-size: 11px; border-radius: 3px; }
+
+/* CONTENT */
+.content { padding: 26px 32px; flex: 1; overflow-y: auto; }
+
+/* KPI STRIP */
+.kpi-strip { display: grid; grid-template-columns: repeat(5,1fr); gap: 0; background: var(--white); border: 1.5px solid var(--rule); border-radius: 6px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+.kpi-cell { padding: 16px 18px; border-right: 1px solid var(--rule); }
+.kpi-cell:last-child { border-right: none; }
+.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
+.kpi-val { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--ink); }
+.kpi-sub { font-size: 10px; color: var(--ink3); font-family: var(--mono); margin-top: 3px; }
+.kpi-orange .kpi-val { color: var(--orange); }
+.kpi-green .kpi-val { color: var(--green); }
+.kpi-red .kpi-val { color: var(--red); }
+.kpi-blue .kpi-val { color: var(--blue); }
+.prog { background: var(--rule2); height: 4px; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+
+/* ALERT */
+.alert { border-radius: 4px; padding: 10px 14px; margin-bottom: 18px; font-size: 12px; border-left: 3px solid; display: flex; align-items: center; gap: 8px; }
+.alert-orange { background: var(--orange-light); border-color: var(--orange); color: #7a2e0a; }
+.alert-red { background: var(--red-light); border-color: var(--red); color: #7a1a1a; }
+.alert-green { background: var(--green-light); border-color: var(--green); color: #1a4d2a; }
+
+/* TABS */
+.tabs { display: flex; border-bottom: 2px solid var(--rule); margin-bottom: 20px; }
+.tab { padding: 9px 20px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink3); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.12s; }
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* SECTION HEADER */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sec-title { font-family: var(--display); font-size: 16px; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+.sec-rule { height: 1px; width: 60px; background: var(--rule); }
+
+/* TABLE */
+.table-card { background: var(--white); border: 1.5px solid var(--rule); border-radius: 6px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--paper); }
+th { padding: 9px 14px; text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); font-weight: 500; border-bottom: 1.5px solid var(--rule); }
+td { padding: 11px 14px; border-bottom: 1px solid var(--rule2); font-size: 12px; vertical-align: middle; color: var(--ink2); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #faf6f0; }
+.td-mono { font-family: var(--mono); font-size: 11px; }
+.td-right { text-align: right; }
+.td-center { text-align: center; }
+.td-strong { font-weight: 600; color: var(--ink); }
+.tfoot-row td { background: var(--paper); font-weight: 600; font-family: var(--mono); font-size: 11px; border-top: 2px solid var(--rule); border-bottom: none; }
+
+/* TYPE PILL */
+.type-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; font-family: var(--mono); }
+.tp-Labour { background: var(--green-light); color: var(--green); }
+.tp-Subcon { background: var(--blue-light); color: var(--blue); }
+.tp-Material { background: var(--gold-light); color: var(--gold); }
+.tp-Equipment { background: var(--purple-light); color: var(--purple); }
+.tp-Claim { background: var(--red-light); color: var(--red); }
+
+/* STATUS PILL */
+.status-pill { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: 600; font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+.sp-Committed { background: var(--blue-light); color: var(--blue); }
+.sp-Invoiced { background: var(--gold-light); color: var(--gold); }
+.sp-Paid { background: var(--green-light); color: var(--green); }
+.sp-Pending { background: var(--gold-light); color: var(--gold); }
+.sp-Received { background: var(--green-light); color: var(--green); }
+
+/* EMPTY */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--ink3); }
+.empty-state .ei { font-size: 30px; margin-bottom: 10px; }
+
+/* OVERVIEW MASTHEAD */
+.overview-masthead { background: var(--ink); padding: 28px 32px 24px; border-bottom: 2px solid var(--rule); flex-shrink: 0; }
+.om-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+.om-title { font-family: var(--display); font-size: 28px; color: #fff; }
+.om-date { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,0.55); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(3px); }
+.modal { background: var(--white); border: 1.5px solid var(--rule); border-radius: 8px; padding: 30px; width: 560px; max-width: 96vw; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+.modal-title { font-family: var(--display); font-size: 20px; color: var(--ink); margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1.5px solid var(--rule); }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--rule2); }
+
+/* FORM */
+.fg { margin-bottom: 14px; }
+.fg label { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; font-weight: 500; }
+.fg input, .fg select, .fg textarea { width: 100%; background: var(--paper); border: 1.5px solid var(--rule); border-radius: 4px; padding: 9px 11px; color: var(--ink); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color 0.12s; }
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--orange); background: var(--white); }
+.fg textarea { resize: vertical; min-height: 56px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.divider { height: 1px; background: var(--rule2); margin: 14px 0; }
+.budget-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; }
+
+/* BREAKDOWN */
+.bar-wrap { display: flex; align-items: center; gap: 10px; }
+.bar-bg { flex: 1; background: var(--rule2); height: 8px; border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-tag">Project Control</div>
+    <div class="logo-name">TY<br>Innovations</div>
+    <div class="logo-sub">Cost Management System</div>
+  </div>
+  <div class="sb-section">Menu</div>
+  <div class="nav-item active" id="nav-overview" onclick="showView('overview')">▤ &nbsp;All Projects</div>
+  <div class="sb-section">Projects</div>
+  <div class="proj-list" id="proj-list"></div>
+  <div class="add-proj-btn" onclick="openNewProject()">+ New Project</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div id="view-overview">
+    <div class="overview-masthead">
+      <div class="om-eyebrow">TY Innovations Pte Ltd — PPWC Operations</div>
+      <div class="om-title">Project Overview</div>
+      <div class="om-date" id="ov-date"></div>
+    </div>
+    <div class="content">
+      <div class="kpi-strip" id="ov-kpis"></div>
+      <div class="sec-hdr">
+        <div class="sec-title">All Projects <div class="sec-rule"></div></div>
+        <button class="btn btn-primary btn-sm" onclick="openNewProject()">+ New Project</button>
+      </div>
+      <div class="table-card" id="ov-table-card">
+        <table>
+          <thead><tr>
+            <th>Project ID</th><th>Client</th><th>Block / Unit</th>
+            <th class="td-right">Contract Value</th>
+            <th class="td-right">Total Cost</th>
+            <th class="td-right">Gross Profit</th>
+            <th class="td-right">GM%</th><th>Status</th>
+          </tr></thead>
+          <tbody id="ov-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state hidden" id="ov-empty"><div class="ei">📋</div><p>No projects yet. Click <strong>+ New Project</strong> to get started.</p></div>
+    </div>
+  </div>
+
+  <!-- PROJECT DETAIL -->
+  <div id="view-project" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <div class="page-hdr">
+      <div>
+        <div class="hdr-eyebrow" id="proj-eyebrow">Project</div>
+        <div class="hdr-title" id="proj-title">—</div>
+        <div class="hdr-meta" id="proj-meta">—</div>
+      </div>
+      <div class="hdr-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openEditProject()">Edit Project</button>
+        <button class="btn btn-green btn-sm" onclick="openAddClaim()">+ Claim</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddCost()">+ Add Cost</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="kpi-strip" id="proj-kpis"></div>
+      <div id="proj-alert"></div>
+      <div class="tabs">
+        <div class="tab active" id="tab-costs" onclick="switchTab('costs')">Cost Entries</div>
+        <div class="tab" id="tab-claims" onclick="switchTab('claims')">Claims &amp; Cashflow</div>
+        <div class="tab" id="tab-breakdown" onclick="switchTab('breakdown')">Budget vs Actual</div>
+      </div>
+
+      <!-- COSTS PANEL -->
+      <div id="panel-costs">
+        <div class="sec-hdr">
+          <div class="sec-title">Cost Entries <div class="sec-rule"></div></div>
+          <select id="filter-type" onchange="renderProject()" style="font-size:11px;padding:5px 10px;border:1.5px solid var(--rule);border-radius:4px;background:var(--white);font-family:var(--mono);color:var(--ink);">
+            <option value="">All Types</option>
+            <option value="Labour">Internal Labour</option>
+            <option value="Subcon">Subcon</option>
+            <option value="Material">Material</option>
+            <option value="Equipment">Equipment</option>
+            <option value="Claim">Claim Cost</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Vendor</th><th>Description</th>
+              <th>Ref No.</th><th class="td-right">Amount</th>
+              <th>Status</th><th class="td-center">Action</th>
+            </tr></thead>
+            <tbody id="costs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLAIMS PANEL -->
+      <div id="panel-claims" class="hidden">
+        <div class="sec-hdr">
+          <div class="sec-title">Claims &amp; Cashflow <div class="sec-rule"></div></div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th>Milestone</th><th class="td-right">Amount</th>
+              <th>Invoice Date</th><th>Received Date</th>
+              <th>Aging</th><th>Status</th><th>Issues</th><th class="td-center">Action</th>
+            </tr></thead>
+            <tbody id="claims-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BREAKDOWN PANEL -->
+      <div id="panel-breakdown" class="hidden">
+        <div class="sec-hdr">
+          <div class="sec-title">Budget vs Actual <div class="sec-rule"></div></div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th>Category</th><th class="td-right">Budget</th>
+              <th class="td-right">Actual</th><th class="td-right">Variance</th>
+              <th style="min-width:180px">Utilisation</th>
+            </tr></thead>
+            <tbody id="breakdown-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL: PROJECT -->
+<div class="modal-overlay hidden" id="modal-project">
+  <div class="modal">
+    <div class="modal-title" id="modal-proj-title">New Project</div>
+    <div class="form-row">
+      <div class="fg"><label>Project ID</label><input id="f-pid" placeholder="e.g. 26-01-215"></div>
+      <div class="fg"><label>Client Name</label><input id="f-pclient" placeholder="e.g. Sin Sheng Fruits"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Block / Unit</label><input id="f-pblock" placeholder="e.g. Blk 26 #01-215"></div>
+      <div class="fg"><label>Contract Value ($)</label><input id="f-prev" type="number" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Start Date</label><input id="f-pstart" type="date"></div>
+      <div class="fg"><label>Target Handover</label><input id="f-phandover" type="date"></div>
+    </div>
+    <div class="fg"><label>Target GM %</label><input id="f-pgm" type="number" value="20" placeholder="20"></div>
+    <div class="divider"></div>
+    <div class="budget-label">Budget Allocation by Category ($)</div>
+    <div class="form-row">
+      <div class="fg"><label>Internal Labour</label><input id="f-bLabour" type="number" placeholder="0"></div>
+      <div class="fg"><label>Subcon</label><input id="f-bSubcon" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Material (Small)</label><input id="f-bMaterial" type="number" placeholder="0"></div>
+      <div class="fg"><label>Equipment Purchase</label><input id="f-bEquipment" type="number" placeholder="0"></div>
+    </div>
+    <div class="fg"><label>Claim / Other Cost</label><input id="f-bClaim" type="number" placeholder="0"></div>
+    <div class="fg"><label>Notes</label><textarea id="f-pnotes" placeholder="Scope or remarks..."></textarea></div>
+    <input type="hidden" id="f-pedit">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-project')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: COST -->
+<div class="modal-overlay hidden" id="modal-cost">
+  <div class="modal">
+    <div class="modal-title" id="modal-cost-title">Add Cost Entry</div>
+    <div class="form-row">
+      <div class="fg"><label>Cost Type</label>
+        <select id="f-ctype">
+          <option value="Labour">Internal Labour</option>
+          <option value="Subcon">Subcon</option>
+          <option value="Material">Material (Small)</option>
+          <option value="Equipment">Equipment Purchase</option>
+          <option value="Claim">Claim Cost</option>
+        </select>
+      </div>
+      <div class="fg"><label>Date</label><input id="f-cdate" type="date"></div>
+    </div>
+    <div class="fg"><label>Vendor / Supplier</label><input id="f-cvendor" placeholder="Company or individual name"></div>
+    <div class="fg"><label>Description</label><input id="f-cdesc" placeholder="Brief description of work or item"></div>
+    <div class="form-row">
+      <div class="fg"><label>Invoice / Ref No.</label><input id="f-cref" placeholder="e.g. INV-001"></div>
+      <div class="fg"><label>Amount ($)</label><input id="f-camount" type="number" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="fg"><label>Status</label>
+      <select id="f-cstatus">
+        <option value="Committed">Committed (PO / Quote agreed)</option>
+        <option value="Invoiced">Invoiced (Invoice received)</option>
+        <option value="Paid">Paid</option>
+      </select>
+    </div>
+    <div class="fg"><label>Remarks</label><textarea id="f-cremarks" placeholder="Optional notes..."></textarea></div>
+    <input type="hidden" id="f-cedit">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cost')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCost()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CLAIM -->
+<div class="modal-overlay hidden" id="modal-claim">
+  <div class="modal">
+    <div class="modal-title">Claim Milestone</div>
+    <div class="fg"><label>Milestone Name</label><input id="f-clname" placeholder="e.g. Progressive Claim 1 — Upon Panel Installation"></div>
+    <div class="form-row">
+      <div class="fg"><label>Claim Amount ($)</label><input id="f-clamount" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="fg"><label>Status</label>
+        <select id="f-clstatus">
+          <option value="Pending">Pending</option>
+          <option value="Invoiced">Invoiced</option>
+          <option value="Received">Received</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Invoice Issued Date</label><input id="f-clinvdate" type="date"></div>
+      <div class="fg"><label>Payment Received Date</label><input id="f-clpaiddate" type="date"></div>
+    </div>
+    <div class="fg"><label>Issues / Blockers</label><textarea id="f-clissues" placeholder="Any blockers to payment?"></textarea></div>
+    <input type="hidden" id="f-cledit">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-claim')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClaim()">Save Claim</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY='ty_pm_v3';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch{return[];}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d));}
+let projects=load(), currentId=null, currentTab='costs';
+
+if(!projects.length){
+  projects=[{
+    id:'p1',
+    projId:'26-01-215',
+    client:'Sin Sheng Fruits',
+    block:'Blk 26 #01-215',
+    startDate:'2026-02-12',
+    handoverDate:'2026-03-31',
+    revenue:121280,
+    targetGM:20,
+    notes:'Sales No. Coldroom: 2026100713 | Sales No. Others: 2025110340 | Contract Revenue: Coldroom $88,000 + Others $33,280. PM KPI Target GM: 18%.',
+    budgets:{Labour:7000, Subcon:57374.50, Material:21613.43, Equipment:15520, Claim:0},
+    costs:[
+      // COMMITMENTS from Sheet 03
+      {id:'c1',type:'Subcon',date:'2026-02-03',vendor:'Hong Sheng Plasterceil Works',desc:'Fire-rated & partition works (incl 1Hr FR door, 1Hr FR partition, normal partition, ordinary door, hollowing for 1Hr partition)',ref:'HS-QUOTE-030226',amount:19450,status:'Committed',remarks:'Non-Grant'},
+      {id:'c2',type:'Subcon',date:'2026-02-11',vendor:'GL Consulting Pte Ltd',desc:'Submission services — SCDF/FSSD BP+FP+exhaust MV+RI+FSC application + aircon layout + FSC02 FR partition + FSC02 coldroom panel (before GST)',ref:'GL-111GL110226R2',amount:5400,status:'Committed',remarks:'Non-Grant'},
+      {id:'c3',type:'Subcon',date:'2026-01-26',vendor:'Chin Hiong Electrical Engineering',desc:'Electrical works for Blk 26 #01-215 (final revised; excl deleted items; excl light fitting supply)',ref:'CH-REF-26-27-01',amount:7696,status:'Committed',remarks:'Non-Grant'},
+      {id:'c4',type:'Subcon',date:'2026-01-23',vendor:'LUM',desc:'Supply labour & materials — install coldroom panels wall/ceiling/floor + 1 set manual sliding door + floor heater & 30mm screed',ref:'INV-6804-CASHSALE',amount:8400,status:'Committed',remarks:'Grant'},
+      {id:'c5',type:'Subcon',date:'2026-01-23',vendor:'BEH',desc:'Concrete/kerb/ramp/support works per handwritten quote (all-in)',ref:'HW-QUOTE-PPWC-SS',amount:6350,status:'Committed',remarks:'Non-Grant'},
+      // LABOUR from Budget
+      {id:'c6',type:'Labour',date:'2026-02-12',vendor:'Internal',desc:'3x Technician + 1x Transport — 10 trips/days',ref:'L400-001',amount:7000,status:'Committed',remarks:'Grant | Rate $700/day'},
+      // EQUIPMENT from Budget
+      {id:'c7',type:'Equipment',date:'2026-02-12',vendor:'Supplier',desc:'Condensing Unit — GVRM040NSA1B x2',ref:'M200-CU',amount:7600,status:'Committed',remarks:'Grant | $3,800 each'},
+      {id:'c8',type:'Equipment',date:'2026-02-12',vendor:'Supplier',desc:'Evaporator — SOLO35E366 x2',ref:'M200-EV',amount:4520,status:'Committed',remarks:'Grant | $2,260 each'},
+      {id:'c9',type:'Equipment',date:'2026-02-12',vendor:'Supplier',desc:'Control Panel x2',ref:'M200-CP',amount:1700,status:'Committed',remarks:'Grant | $850 each'},
+      {id:'c10',type:'Equipment',date:'2026-02-12',vendor:'Supplier',desc:'EVD Ice + EEV x2',ref:'M200-EVD',amount:1700,status:'Committed',remarks:'Grant | $850 each'},
+      // MATERIALS from Budget
+      {id:'c11',type:'Material',date:'2026-02-12',vendor:'Panel Supplier',desc:'PIR Panel 100mm — 224.1m2 @ $60/m2',ref:'M100-PAN',amount:13446,status:'Committed',remarks:'Grant'},
+      {id:'c12',type:'Material',date:'2026-02-12',vendor:'Panel Supplier',desc:'PIR Floor Slab 100mm — 50.7m2 @ $40/m2',ref:'M100-FLR',amount:2028,status:'Committed',remarks:'Grant'},
+      {id:'c13',type:'Material',date:'2026-02-12',vendor:'Panel Supplier',desc:'Sliding Door w/ Strip Curtain — W1800 x H2700mm',ref:'M110-DR',amount:2200,status:'Committed',remarks:'Grant | Inclusive accessories'},
+      {id:'c14',type:'Material',date:'2026-02-12',vendor:'Panel Supplier',desc:'Panel Submission — COC, DOC',ref:'M100-DOC',amount:100,status:'Committed',remarks:'Grant | Documentation fees'},
+      {id:'c15',type:'Material',date:'2026-02-12',vendor:'Supplier',desc:'Floor Heater — 50.7m2 @ $40/m2',ref:'M210-FH',amount:2028,status:'Committed',remarks:'Grant'},
+      {id:'c16',type:'Material',date:'2026-02-12',vendor:'Refrigerant Supplier',desc:'Liquid Pipe 1/2" G21 Pancake Coil 15m x1',ref:'M210-LP',amount:61.51,status:'Committed',remarks:'Grant'},
+      {id:'c17',type:'Material',date:'2026-02-12',vendor:'Refrigerant Supplier',desc:'Suction Pipe 7/8" G21 Hard Drawn Straight 5.8m x3',ref:'M210-SP',amount:111.42,status:'Committed',remarks:'Grant'},
+      {id:'c18',type:'Material',date:'2026-02-12',vendor:'Refrigerant Supplier',desc:'Pre-Insulation 115mm x 5.55m x3',ref:'M210-INS',amount:219,status:'Committed',remarks:'Grant'},
+      {id:'c19',type:'Material',date:'2026-02-12',vendor:'Refrigerant Supplier',desc:'Filter Drier x2',ref:'M210-FD',amount:100,status:'Committed',remarks:'Grant'},
+      {id:'c20',type:'Material',date:'2026-02-12',vendor:'Refrigerant Supplier',desc:'Refrigerant R410a x2',ref:'M210-REF',amount:180,status:'Committed',remarks:'Grant'},
+      {id:'c21',type:'Material',date:'2026-02-12',vendor:'Electrical Supplier',desc:'Single Core Wire 4mm x5 rolls',ref:'M210-W4',amount:298,status:'Committed',remarks:'Grant'},
+      {id:'c22',type:'Material',date:'2026-02-12',vendor:'Electrical Supplier',desc:'Single Core Wire 2.5mm x5 rolls',ref:'M210-W25',amount:202,status:'Committed',remarks:'Grant'},
+      {id:'c23',type:'Material',date:'2026-02-12',vendor:'Electrical Supplier',desc:'Single Core Wire 1.0mm x5 rolls',ref:'M210-W1',amount:129.5,status:'Committed',remarks:'Grant'},
+      {id:'c24',type:'Material',date:'2026-02-12',vendor:'Electrical Supplier',desc:'Trunking',ref:'M210-TRK',amount:200,status:'Committed',remarks:'Grant'},
+      {id:'c25',type:'Material',date:'2026-02-12',vendor:'Electrical Supplier',desc:'Vaporproof LED Lighting High Bay x2',ref:'M120-LED',amount:310,status:'Committed',remarks:'Grant | Supply+install'},
+    ],
+    claims:[]
+  }];
+  save(projects);
+}
+
+const fmt=n=>'$'+Number(n||0).toLocaleString('en-SG',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=n=>(Number(n||0)*100).toFixed(1)+'%';
+const uid=()=>'x'+Math.random().toString(36).slice(2,9);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+function costTotals(p){const t={Labour:0,Subcon:0,Material:0,Equipment:0,Claim:0};(p.costs||[]).forEach(c=>{t[c.type]=(t[c.type]||0)+(c.amount||0);});return t;}
+const totalCost=p=>Object.values(costTotals(p)).reduce((a,b)=>a+b,0);
+const totalBudget=p=>Object.values(p.budgets||{}).reduce((a,b)=>a+b,0);
+const gp=p=>(p.revenue||0)-totalCost(p);
+const gmPct=p=>p.revenue?gp(p)/p.revenue:0;
+const received=p=>(p.claims||[]).filter(c=>c.status==='Received').reduce((a,c)=>a+(c.amount||0),0);
+const ageDays=d=>d?Math.floor((Date.now()-new Date(d))/864e5):null;
+const TYPE_COLORS={Labour:'#2a6b3f',Subcon:'#1a3d6b',Material:'#a07c30',Equipment:'#5e3a8c',Claim:'#b52929'};
+const TYPE_BG={Labour:'#e3f0e8',Subcon:'#e3ecf5',Material:'#f5edd8',Equipment:'#f0eaf8',Claim:'#f5e3e3'};
+const LABELS={Labour:'Internal Labour',Subcon:'Subcon',Material:'Material (Small)',Equipment:'Equipment Purchase',Claim:'Claim Cost'};
+
+function renderSidebar(){
+  const el=document.getElementById('proj-list'); el.innerHTML='';
+  if(!projects.length){el.innerHTML='<div style="padding:10px;font-size:11px;color:rgba(255,255,255,0.22)">No projects yet</div>';return;}
+  projects.forEach(p=>{
+    const gm=gmPct(p),cc=gm>=(p.targetGM/100)?'chip-green':gm>=0.1?'chip-orange':'chip-red';
+    const d=document.createElement('div');
+    d.className='proj-card'+(p.id===currentId?' active':'');
+    d.innerHTML=`<div class="pc-id">${p.projId}</div><div class="pc-name">${p.client}</div>
+      <div class="pc-gp"><span class="chip ${cc}">${pct(gm)} GM</span><span style="color:rgba(255,255,255,0.38)">${fmt(gp(p))}</span></div>`;
+    d.onclick=()=>{currentId=p.id;showView('project');};
+    el.appendChild(d);
+  });
+}
+
+function renderOverview(){
+  document.getElementById('ov-date').textContent=new Date().toLocaleDateString('en-SG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const tRev=projects.reduce((a,p)=>a+(p.revenue||0),0);
+  const tCost=projects.reduce((a,p)=>a+totalCost(p),0);
+  const tGP=projects.reduce((a,p)=>a+gp(p),0);
+  const tGM=tRev?tGP/tRev:0;
+  const tRec=projects.reduce((a,p)=>a+received(p),0);
+  document.getElementById('ov-kpis').innerHTML=`
+    <div class="kpi-cell kpi-blue"><div class="kpi-label">Total Projects</div><div class="kpi-val">${projects.length}</div></div>
+    <div class="kpi-cell"><div class="kpi-label">Contract Value</div><div class="kpi-val">${fmt(tRev)}</div></div>
+    <div class="kpi-cell kpi-orange"><div class="kpi-label">Total Cost</div><div class="kpi-val">${fmt(tCost)}</div></div>
+    <div class="kpi-cell kpi-green"><div class="kpi-label">Gross Profit</div><div class="kpi-val">${fmt(tGP)}</div><div class="kpi-sub">${pct(tGM)} overall GM</div></div>
+    <div class="kpi-cell kpi-blue"><div class="kpi-label">Cash Received</div><div class="kpi-val">${fmt(tRec)}</div></div>
+  `;
+  if(!projects.length){document.getElementById('ov-table-card').classList.add('hidden');document.getElementById('ov-empty').classList.remove('hidden');return;}
+  document.getElementById('ov-table-card').classList.remove('hidden');document.getElementById('ov-empty').classList.add('hidden');
+  document.getElementById('ov-tbody').innerHTML=projects.map(p=>{
+    const tc=totalCost(p),g=gp(p),gm=gmPct(p),cc=gm>=(p.targetGM/100)?'chip-green':gm>=0.1?'chip-orange':'chip-red';
+    return `<tr style="cursor:pointer" onclick="currentId='${p.id}';showView('project')">
+      <td class="td-strong td-mono">${p.projId}</td><td>${p.client}</td>
+      <td class="td-mono" style="font-size:11px;color:var(--ink3)">${p.block||'—'}</td>
+      <td class="td-right td-mono">${fmt(p.revenue)}</td>
+      <td class="td-right td-mono" style="color:var(--orange)">${fmt(tc)}</td>
+      <td class="td-right td-mono" style="color:${g>=0?'var(--green)':'var(--red)'};font-weight:600">${fmt(g)}</td>
+      <td class="td-right"><span class="chip ${cc}">${pct(gm)}</span></td>
+      <td><span class="status-pill sp-Committed">Active</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProject(){
+  const p=projects.find(x=>x.id===currentId);if(!p)return;
+  document.getElementById('proj-eyebrow').textContent=`Project — ${p.projId}`;
+  document.getElementById('proj-title').textContent=p.client;
+  document.getElementById('proj-meta').textContent=`${p.block||''}   ·   Start: ${p.startDate||'—'}   ·   Target Handover: ${p.handoverDate||'—'}`;
+  const tc=totalCost(p),gpv=gp(p),gm=gmPct(p),tb=totalBudget(p),burn=tb?Math.min(tc/tb,1):0,rec=received(p),outstanding=(p.revenue||0)-rec;
+  document.getElementById('proj-kpis').innerHTML=`
+    <div class="kpi-cell"><div class="kpi-label">Contract Value</div><div class="kpi-val">${fmt(p.revenue)}</div></div>
+    <div class="kpi-cell kpi-orange"><div class="kpi-label">Total Cost</div><div class="kpi-val">${fmt(tc)}</div>
+      <div class="prog"><div class="prog-fill" style="width:${(burn*100).toFixed(0)}%;background:var(--orange)"></div></div>
+      <div class="kpi-sub">${(burn*100).toFixed(0)}% of budget</div>
+    </div>
+    <div class="kpi-cell ${gpv>=0?'kpi-green':'kpi-red'}"><div class="kpi-label">Gross Profit</div><div class="kpi-val">${fmt(gpv)}</div></div>
+    <div class="kpi-cell ${gm>=(p.targetGM/100)?'kpi-green':'kpi-orange'}"><div class="kpi-label">GM%</div><div class="kpi-val">${pct(gm)}</div><div class="kpi-sub">Target: ${p.targetGM}%</div></div>
+    <div class="kpi-cell kpi-blue"><div class="kpi-label">Outstanding Claims</div><div class="kpi-val">${fmt(outstanding)}</div><div class="kpi-sub">Received: ${fmt(rec)}</div></div>
+  `;
+  const al=document.getElementById('proj-alert');
+  if(tc>tb&&tb>0) al.innerHTML=`<div class="alert alert-orange">⚠ Cost ${fmt(tc)} exceeded budget ${fmt(tb)} by ${fmt(tc-tb)}. Review and raise VO if needed.</div>`;
+  else if(gm<(p.targetGM/100)&&tc>0) al.innerHTML=`<div class="alert alert-red">⚠ GM% is ${pct(gm)}, below ${p.targetGM}% target. Review costs or claim additional VO revenue.</div>`;
+  else if(tc>0) al.innerHTML=`<div class="alert alert-green">✓ On track — GM at ${pct(gm)} against ${p.targetGM}% target.</div>`;
+  else al.innerHTML='';
+  renderCosts(p); renderClaims(p); renderBreakdown(p);
+}
+
+function renderCosts(p){
+  const ft=document.getElementById('filter-type').value;
+  let costs=[...(p.costs||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  if(ft) costs=costs.filter(c=>c.type===ft);
+  const total=costs.reduce((a,c)=>a+(c.amount||0),0);
+  const tbody=document.getElementById('costs-tbody');
+  if(!costs.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">📝</div><p>No entries yet. Click <strong>+ Add Cost</strong> to begin.</p></div></td></tr>`;return;}
+  tbody.innerHTML=costs.map(c=>{
+    const oi=(p.costs||[]).indexOf(c);
+    return `<tr>
+      <td class="td-mono" style="white-space:nowrap">${c.date||'—'}</td>
+      <td><span class="type-pill tp-${c.type}">${c.type}</span></td>
+      <td class="td-strong" style="white-space:nowrap">${c.vendor||'—'}</td>
+      <td style="color:var(--ink3);max-width:200px;font-size:11px">${c.desc||''}</td>
+      <td class="td-mono" style="font-size:10px;color:var(--ink3)">${c.ref||'—'}</td>
+      <td class="td-right td-mono" style="font-weight:600">${fmt(c.amount)}</td>
+      <td><span class="status-pill sp-${c.status}">${c.status}</span></td>
+      <td class="td-center" style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editCost(${oi})">Edit</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteCost(${oi})">Del</button>
+      </td>
+    </tr>`;
+  }).join('')+`<tr class="tfoot-row"><td colspan="5" style="text-align:right;color:var(--ink3)">TOTAL</td><td class="td-right" style="color:var(--orange)">${fmt(total)}</td><td colspan="2"></td></tr>`;
+}
+
+function renderClaims(p){
+  const claims=p.claims||[],tbody=document.getElementById('claims-tbody');
+  const total=claims.reduce((a,c)=>a+(c.amount||0),0),rec=claims.filter(c=>c.status==='Received').reduce((a,c)=>a+(c.amount||0),0);
+  if(!claims.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">💰</div><p>No claims yet. Click <strong>+ Claim</strong> to add.</p></div></td></tr>`;return;}
+  tbody.innerHTML=claims.map((c,i)=>{
+    const age=(c.invDate&&c.status!=='Received')?ageDays(c.invDate):null;
+    const ageHtml=age!==null?(age>30?`<span style="color:var(--red);font-weight:600">${age}d ⚠</span>`:`${age}d`):'—';
+    return `<tr>
+      <td class="td-strong">${c.name}</td>
+      <td class="td-right td-mono" style="font-weight:600">${fmt(c.amount)}</td>
+      <td class="td-mono" style="font-size:11px">${c.invDate||'—'}</td>
+      <td class="td-mono" style="font-size:11px">${c.paidDate||'—'}</td>
+      <td class="td-mono" style="font-size:11px">${ageHtml}</td>
+      <td><span class="status-pill sp-${c.status}">${c.status}</span></td>
+      <td style="font-size:11px;color:var(--ink3)">${c.issues||'—'}</td>
+      <td class="td-center" style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editClaim(${i})">Edit</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteClaim(${i})">Del</button>
+      </td>
+    </tr>`;
+  }).join('')+`<tr class="tfoot-row"><td>TOTAL CLAIMED</td><td class="td-right">${fmt(total)}</td><td colspan="2" style="color:var(--ink3)">Received: ${fmt(rec)}</td><td colspan="4"></td></tr>`;
+}
+
+function renderBreakdown(p){
+  const actuals=costTotals(p),budgets=p.budgets||{},tbody=document.getElementById('breakdown-tbody');
+  let tb=0,ta=0;
+  tbody.innerHTML=['Labour','Subcon','Material','Equipment','Claim'].map(t=>{
+    const b=budgets[t]||0,a=actuals[t]||0,v=a-b;
+    tb+=b;ta+=a;
+    const pu=b?Math.min(a/b,1.5):0,bc=a>b?'var(--red)':'var(--green)';
+    return `<tr>
+      <td><span style="display:inline-flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:2px;background:${TYPE_BG[t]};border:1.5px solid ${TYPE_COLORS[t]};display:inline-block;flex-shrink:0"></span>
+        <span style="font-weight:600">${LABELS[t]}</span>
+      </span></td>
+      <td class="td-right td-mono">${fmt(b)}</td>
+      <td class="td-right td-mono" style="color:var(--orange)">${fmt(a)}</td>
+      <td class="td-right td-mono" style="color:${v<=0?'var(--green)':'var(--red)'};font-weight:600">${v===0?'—':(v<0?'':'+')+(fmt(v))}</td>
+      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${(pu*100).toFixed(0)}%;background:${bc}"></div></div>
+        <span class="td-mono" style="font-size:10px;min-width:36px;text-align:right;color:var(--ink3)">${b?((a/b*100).toFixed(0))+'%':'—'}</span></div></td>
+    </tr>`;
+  }).join('')+`<tr class="tfoot-row"><td style="font-weight:700">TOTAL</td><td class="td-right">${fmt(tb)}</td><td class="td-right" style="color:var(--orange)">${fmt(ta)}</td><td class="td-right" style="color:${ta<=tb?'var(--green)':'var(--red)'}">${ta===tb?'—':(ta<tb?'':'+')+(fmt(ta-tb))}</td><td></td></tr>`;
+}
+
+function showView(v){
+  document.getElementById('view-overview').classList.toggle('hidden',v!=='overview');
+  document.getElementById('view-project').classList.toggle('hidden',v!=='project');
+  if(v==='project') document.getElementById('view-project').style.display='flex';
+  document.getElementById('nav-overview').classList.toggle('active',v==='overview');
+  renderSidebar();
+  if(v==='overview') renderOverview();
+  if(v==='project') renderProject();
+}
+function switchTab(t){
+  currentTab=t;
+  ['costs','claims','breakdown'].forEach(x=>{
+    document.getElementById('panel-'+x).classList.toggle('hidden',x!==t);
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+  });
+}
+
+// PROJECT CRUD
+function openNewProject(){
+  document.getElementById('modal-proj-title').textContent='New Project';
+  ['f-pid','f-pclient','f-pblock','f-pstart','f-phandover','f-pnotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-prev').value='';document.getElementById('f-pgm').value='20';
+  ['Labour','Subcon','Material','Equipment','Claim'].forEach(t=>document.getElementById('f-b'+t).value='');
+  document.getElementById('f-pedit').value='';document.getElementById('modal-project').classList.remove('hidden');
+}
+function openEditProject(){
+  const p=projects.find(x=>x.id===currentId);if(!p)return;
+  document.getElementById('modal-proj-title').textContent='Edit Project';
+  document.getElementById('f-pid').value=p.projId||'';document.getElementById('f-pclient').value=p.client||'';
+  document.getElementById('f-pblock').value=p.block||'';document.getElementById('f-prev').value=p.revenue||'';
+  document.getElementById('f-pstart').value=p.startDate||'';document.getElementById('f-phandover').value=p.handoverDate||'';
+  document.getElementById('f-pgm').value=p.targetGM||20;document.getElementById('f-pnotes').value=p.notes||'';
+  const b=p.budgets||{};['Labour','Subcon','Material','Equipment','Claim'].forEach(t=>document.getElementById('f-b'+t).value=b[t]||'');
+  document.getElementById('f-pedit').value=p.id;document.getElementById('modal-project').classList.remove('hidden');
+}
+function saveProject(){
+  const eid=document.getElementById('f-pedit').value,budgets={};
+  ['Labour','Subcon','Material','Equipment','Claim'].forEach(t=>budgets[t]=parseFloat(document.getElementById('f-b'+t).value)||0);
+  const d={projId:document.getElementById('f-pid').value.trim(),client:document.getElementById('f-pclient').value.trim(),
+    block:document.getElementById('f-pblock').value.trim(),revenue:parseFloat(document.getElementById('f-prev').value)||0,
+    startDate:document.getElementById('f-pstart').value,handoverDate:document.getElementById('f-phandover').value,
+    targetGM:parseFloat(document.getElementById('f-pgm').value)||20,notes:document.getElementById('f-pnotes').value.trim(),budgets};
+  if(!d.projId||!d.client){alert('Project ID and Client required.');return;}
+  if(eid){const i=projects.findIndex(x=>x.id===eid);if(i>=0)projects[i]={...projects[i],...d};}
+  else{projects.push({id:uid(),costs:[],claims:[],...d});}
+  save(projects);closeModal('modal-project');
+  if(eid)renderProject();else{currentId=projects[projects.length-1].id;showView('project');}
+}
+
+// COST CRUD
+function openAddCost(){
+  document.getElementById('modal-cost-title').textContent='Add Cost Entry';
+  document.getElementById('f-ctype').value='Labour';document.getElementById('f-cdate').value=todayStr();
+  ['f-cvendor','f-cdesc','f-cref','f-cremarks'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-camount').value='';document.getElementById('f-cstatus').value='Committed';
+  document.getElementById('f-cedit').value='';document.getElementById('modal-cost').classList.remove('hidden');
+}
+function editCost(idx){
+  const p=projects.find(x=>x.id===currentId),c=p.costs[idx];
+  document.getElementById('modal-cost-title').textContent='Edit Cost Entry';
+  document.getElementById('f-ctype').value=c.type;document.getElementById('f-cdate').value=c.date||'';
+  document.getElementById('f-cvendor').value=c.vendor||'';document.getElementById('f-cdesc').value=c.desc||'';
+  document.getElementById('f-cref').value=c.ref||'';document.getElementById('f-camount').value=c.amount||'';
+  document.getElementById('f-cstatus').value=c.status||'Committed';document.getElementById('f-cremarks').value=c.remarks||'';
+  document.getElementById('f-cedit').value=idx;document.getElementById('modal-cost').classList.remove('hidden');
+}
+function saveCost(){
+  const p=projects.find(x=>x.id===currentId),idx=document.getElementById('f-cedit').value;
+  const e={id:idx!==''?(p.costs[idx].id||uid()):uid(),type:document.getElementById('f-ctype').value,
+    date:document.getElementById('f-cdate').value,vendor:document.getElementById('f-cvendor').value.trim(),
+    desc:document.getElementById('f-cdesc').value.trim(),ref:document.getElementById('f-cref').value.trim(),
+    amount:parseFloat(document.getElementById('f-camount').value)||0,
+    status:document.getElementById('f-cstatus').value,remarks:document.getElementById('f-cremarks').value.trim()};
+  if(!e.amount){alert('Amount is required.');return;}
+  if(idx!=='')p.costs[idx]=e;else p.costs.push(e);
+  save(projects);closeModal('modal-cost');renderProject();renderSidebar();
+}
+function deleteCost(idx){
+  if(!confirm('Delete this cost entry?'))return;
+  projects.find(x=>x.id===currentId).costs.splice(idx,1);
+  save(projects);renderProject();renderSidebar();
+}
+
+// CLAIM CRUD
+function openAddClaim(){
+  ['f-clname','f-clinvdate','f-clpaiddate','f-clissues'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-clamount').value='';document.getElementById('f-clstatus').value='Pending';
+  document.getElementById('f-cledit').value='';document.getElementById('modal-claim').classList.remove('hidden');
+  switchTab('claims');
+}
+function editClaim(idx){
+  const p=projects.find(x=>x.id===currentId),c=p.claims[idx];
+  document.getElementById('f-clname').value=c.name||'';document.getElementById('f-clamount').value=c.amount||'';
+  document.getElementById('f-clinvdate').value=c.invDate||'';document.getElementById('f-clpaiddate').value=c.paidDate||'';
+  document.getElementById('f-clstatus').value=c.status||'Pending';document.getElementById('f-clissues').value=c.issues||'';
+  document.getElementById('f-cledit').value=idx;document.getElementById('modal-claim').classList.remove('hidden');
+}
+function saveClaim(){
+  const p=projects.find(x=>x.id===currentId),idx=document.getElementById('f-cledit').value;
+  const e={id:idx!==''?(p.claims[idx].id||uid()):uid(),name:document.getElementById('f-clname').value.trim(),
+    amount:parseFloat(document.getElementById('f-clamount').value)||0,invDate:document.getElementById('f-clinvdate').value,
+    paidDate:document.getElementById('f-clpaiddate').value,status:document.getElementById('f-clstatus').value,
+    issues:document.getElementById('f-clissues').value.trim()};
+  if(!e.name||!e.amount){alert('Name and Amount required.');return;}
+  if(idx!=='')p.claims[idx]=e;else p.claims.push(e);
+  save(projects);closeModal('modal-claim');renderProject();renderSidebar();
+}
+function deleteClaim(idx){
+  if(!confirm('Delete this claim?'))return;
+  projects.find(x=>x.id===currentId).claims.splice(idx,1);
+  save(projects);renderProject();
+}
+
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden');}));
+
+currentId=projects[0]?.id||null;
+if(currentId)showView('project');else showView('overview');
+</script>
+</body>
+</html>
